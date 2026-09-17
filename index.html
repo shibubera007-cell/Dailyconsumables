@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Consumables Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef1f7; color: #333; }
+
+        /* ================= LOGIN ================= */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 20% 20%, #764ba2 0%, #2a2470 45%, #14163a 100%);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; transition: opacity 0.5s ease; overflow-y: auto; padding: 20px;
+        }
+        #loginOverlay.hidden { opacity: 0; pointer-events: none; }
+        .login-box {
+            background: white; padding: 42px 36px 36px; border-radius: 22px;
+            box-shadow: 0 30px 90px rgba(0,0,0,0.5);
+            width: 100%; max-width: 440px;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            animation: loginFadeIn 0.6s ease-out; position: relative;
+        }
+        .login-box::before {
+            content: ''; position: absolute; top: -2px; left: 20%; right: 20%; height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f6ad55);
+            border-radius: 0 0 4px 4px;
+        }
+        @keyframes loginFadeIn { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .login-brand { text-align: center; margin-bottom: 24px; padding-bottom: 22px; border-bottom: 1px dashed #e2e8f0; }
+        .login-lock { display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 14px; color: #fff; font-size: 26px; margin-bottom: 14px; box-shadow: 0 12px 26px rgba(102,126,234,0.4); }
+        .login-brand h2 { font-size: 20px; font-weight: 800; color: #2d3748; line-height: 1.35; margin-bottom: 14px; }
+        .login-brand h2 .accent { background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .login-brand .byline { font-size: 11px; color: #718096; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; margin-bottom: 2px; }
+        .login-signature { font-family: 'Great Vibes', cursive; font-size: 46px; line-height: 1.1; color: #4c51bf; transform: rotate(-4deg); display: inline-block; text-shadow: 0 2px 6px rgba(102,126,234,0.25); animation: signatureGlow 3s ease-in-out infinite alternate; }
+        @keyframes signatureGlow { from { text-shadow: 0 2px 6px rgba(102,126,234,0.25); } to { text-shadow: 0 2px 18px rgba(118,75,162,0.55); } }
+        .login-box .field-group { margin-bottom: 14px; text-align: left; }
+        .login-box .field-group label { display: block; font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 6px; letter-spacing: 0.4px; text-transform: uppercase; }
+        .login-box input { width: 100%; padding: 13px 15px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 15px; transition: border-color 0.3s, box-shadow 0.3s; font-family: inherit; background: #f8fafc; }
+        .login-box input:focus { outline: none; border-color: #667eea; background: white; box-shadow: 0 0 0 4px rgba(102,126,234,0.12); }
+        .login-box .btn { width: 100%; padding: 13px; font-size: 15px; border-radius: 10px; }
+        .login-error { color: #c53030; font-size: 13px; margin-bottom: 12px; display: none; font-weight: 600; text-align: center; background: #fff5f5; padding: 10px; border-radius: 8px; border: 1px solid #fed7d7; }
+        .login-hint { text-align: center; font-size: 12px; color: #718096; margin-top: 18px; padding-top: 16px; border-top: 1px dashed #e2e8f0; line-height: 1.7; }
+        .login-hint b { color: #4a5568; }
+        .login-hint .cred { display: inline-block; padding: 2px 8px; background: #edf2ff; border-radius: 5px; color: #4c51bf; font-weight: 700; margin: 0 2px; }
+
+        /* ================= STORE KEY ================= */
+        #storeKeyOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 80% 20%, #2b6cb0 0%, #1a365d 45%, #0d1b2e 100%);
+            display: none; justify-content: center; align-items: center;
+            z-index: 9998; padding: 20px; overflow-y: auto;
+        }
+        #storeKeyOverlay.active { display: flex; }
+        .store-key-box { background: white; padding: 40px 34px; border-radius: 20px; box-shadow: 0 30px 90px rgba(0,0,0,0.55); width: 100%; max-width: 500px; font-family: 'Poppins', 'Segoe UI', sans-serif; animation: loginFadeIn 0.5s ease-out; text-align: center; position: relative; overflow: hidden; }
+        .store-key-box::before { content: ''; position: absolute; top: -80px; right: -80px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(102,126,234,0.15), transparent 70%); }
+        .store-key-icon { display: inline-flex; align-items: center; justify-content: center; width: 62px; height: 62px; background: linear-gradient(135deg, #ed8936, #dd6b20); border-radius: 16px; color: #fff; font-size: 30px; margin-bottom: 14px; box-shadow: 0 14px 30px rgba(237,137,54,0.4); position: relative; z-index: 1; }
+        .store-key-box h2 { font-size: 22px; font-weight: 800; color: #2d3748; margin-bottom: 8px; position: relative; z-index: 1; }
+        .store-key-box .sub { font-size: 13px; color: #718096; margin-bottom: 22px; line-height: 1.6; position: relative; z-index: 1; }
+        .store-key-box .field-group { margin-bottom: 14px; text-align: left; position: relative; z-index: 1; }
+        .store-key-box label { display: block; font-size: 12px; font-weight: 700; color: #4a5568; margin-bottom: 6px; letter-spacing: 0.4px; text-transform: uppercase; }
+        .store-key-box input[type="password"] { width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; font-family: 'Courier New', monospace; letter-spacing: 1px; transition: all 0.3s; background: #f8fafc; }
+        .store-key-box input[type="password"]:focus { outline: none; border-color: #ed8936; background: white; box-shadow: 0 0 0 4px rgba(237,137,54,0.15); }
+        .store-key-box .btn { width: 100%; padding: 14px; font-size: 15px; border-radius: 10px; }
+        .store-key-error { color: #c53030; font-size: 13px; font-weight: 600; margin-top: -6px; margin-bottom: 14px; display: none; position: relative; z-index: 1; }
+
+        /* One-time remember option */
+        .remember-option {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 12px 14px; border-radius: 10px;
+            background: #f0fff4; border: 1px solid #9ae6b4;
+            margin-bottom: 16px; text-align: left;
+            position: relative; z-index: 1; cursor: pointer;
+            transition: all 0.2s;
+        }
+        .remember-option:hover { background: #e6fffa; border-color: #38b2ac; }
+        .remember-option input[type="checkbox"] {
+            width: 20px; height: 20px; margin-top: 1px;
+            accent-color: #38a169; cursor: pointer; flex-shrink: 0;
+        }
+        .remember-option .rem-text {
+            flex: 1; font-size: 13px; color: #22543d; font-weight: 600; line-height: 1.4;
+        }
+        .remember-option .rem-sub {
+            display: block; font-size: 11px; color: #2f855a;
+            font-weight: 500; margin-top: 3px;
+        }
+
+        .store-key-hint { margin-top: 20px; padding-top: 18px; border-top: 1px dashed #e2e8f0; font-size: 12px; color: #718096; line-height: 1.7; position: relative; z-index: 1; }
+        .store-key-hint b { color: #4a5568; }
+        .store-key-userline {
+            display: inline-block; background: #edf2ff; color: #4c51bf;
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 700; margin-bottom: 14px;
+            position: relative; z-index: 1;
+        }
+
+        /* ================= HEADER ================= */
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 30px; box-shadow: 0 4px 20px rgba(102,126,234,0.35); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+        .header h1 { font-size: 22px; margin-bottom: 4px; letter-spacing: 0.3px; font-weight: 800; }
+        .header .subtitle { font-size: 13px; opacity: 0.85; }
+        .header .subtitle .author { font-family: 'Great Vibes', cursive; font-size: 17px; color: #ffe4b5; margin-left: 4px; }
+        .header-user { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.15); padding: 8px 14px; border-radius: 12px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); }
+        .header-user .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #ffe4b5, #ed8936); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: #744210; }
+        .header-user .info .name { font-size: 13px; font-weight: 700; line-height: 1.2; }
+        .header-user .info .role { font-size: 11px; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.6px; }
+        .header-user .btn-logout { background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .header-user .btn-logout:hover { background: rgba(255,255,255,0.35); }
+
+        .readonly-banner { display: none; background: linear-gradient(90deg, #fefcbf 0%, #faf089 100%); color: #744210; padding: 10px 22px; text-align: center; font-weight: 700; font-size: 13px; border-bottom: 2px solid #d69e2e; letter-spacing: 0.3px; }
+        .readonly-banner.show { display: block; }
+
+        .nav { display: flex; overflow-x: auto; background: white; padding: 8px 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); position: sticky; top: 88px; z-index: 99; }
+        .nav button { padding: 11px 22px; margin: 0 4px; border: none; background: transparent; color: #666; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.25s; white-space: nowrap; font-size: 14px; }
+        .nav button:hover { background: #f0f3ff; color: #667eea; }
+        .nav button.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; box-shadow: 0 4px 14px rgba(102,126,234,0.35); }
+
+        .container { max-width: 1400px; margin: 24px auto; padding: 0 24px; }
+        .section { display: none; animation: fadeIn 0.35s; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: white; border-radius: 16px; padding: 22px; margin-bottom: 22px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .card-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; color: #2d3748; display: flex; align-items: center; gap: 8px; }
+
+        /* KPI */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 22px; }
+        .kpi-card { position: relative; overflow: hidden; padding: 24px 24px 22px; border-radius: 18px; color: white; text-align: left; box-shadow: 0 10px 28px rgba(0,0,0,0.14); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; min-height: 158px; display: flex; flex-direction: column; justify-content: space-between; }
+        .kpi-card::before { content: ''; position: absolute; top: -60px; right: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,0.13); transition: transform 0.4s; }
+        .kpi-card::after  { content: ''; position: absolute; bottom: -80px; left: -30px; width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.08); }
+        .kpi-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 44px rgba(0,0,0,0.22); }
+        .kpi-card:hover::before { transform: scale(1.3); }
+        .kpi-card .kpi-icon { font-size: 26px; display: inline-flex; align-items: center; justify-content: center; width: 50px; height: 50px; background: rgba(255,255,255,0.22); border-radius: 14px; backdrop-filter: blur(4px); margin-bottom: 12px; position: relative; z-index: 1; }
+        .kpi-card .kpi-value { font-size: 34px; font-weight: 800; margin: 4px 0 2px; color: white; position: relative; z-index: 1; line-height: 1.1; letter-spacing: -0.5px; }
+        .kpi-card .kpi-label { font-size: 12px; opacity: 0.95; text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700; position: relative; z-index: 1; }
+        .kpi-purple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .kpi-blue   { background: linear-gradient(135deg, #4299e1 0%, #2b6cb0 100%); }
+        .kpi-red    { background: linear-gradient(135deg, #f56565 0%, #c53030 100%); }
+        .kpi-orange { background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); }
+        .kpi-green  { background: linear-gradient(135deg, #48bb78 0%, #2f855a 100%); }
+        .kpi-card.alert-active::after { content: ''; position: absolute; top: 18px; right: 18px; width: 12px; height: 12px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 0 rgba(255,255,255,0.7); animation: pulse 1.6s infinite; z-index: 2; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.85); } 70% { box-shadow: 0 0 0 16px rgba(255,255,255,0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
+
+        /* ALERTS */
+        .alert-panel { border-radius: 18px; margin-bottom: 22px; background: white; box-shadow: 0 6px 24px rgba(0,0,0,0.07); overflow: hidden; }
+        .alert-header { padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; background: linear-gradient(135deg, #fff5f5 0%, #fffaf0 100%); border-bottom: 1px solid #feb2b2; }
+        .alert-header h3 { font-size: 17px; color: #742a2a; display: flex; align-items: center; gap: 10px; font-weight: 800; }
+        .alert-header h3 .pulse-dot { width: 10px; height: 10px; border-radius: 50%; background: #e53e3e; box-shadow: 0 0 0 0 rgba(229,62,62,0.7); animation: pulseRed 1.6s infinite; }
+        @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(229,62,62,0.7); } 70% { box-shadow: 0 0 0 12px rgba(229,62,62,0); } 100% { box-shadow: 0 0 0 0 rgba(229,62,62,0); } }
+        .alert-header .alert-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+        .pill { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; background: #edf2f7; color: #4a5568; }
+        .pill-red { background: #fed7d7; color: #822727; }
+        .pill-orange { background: #feebc8; color: #7b341e; }
+        .pill-yellow { background: #fefcbf; color: #744210; }
+        .alert-list { padding: 16px 22px 20px; max-height: 440px; overflow-y: auto; }
+        .alert-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; background: white; margin-bottom: 10px; border-left: 5px solid #ed8936; transition: all 0.25s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .alert-item:hover { transform: translateX(4px); box-shadow: 0 8px 22px rgba(0,0,0,0.1); }
+        .alert-item.sev-out { border-left-color: #e53e3e; background: linear-gradient(90deg, #fff5f5 0%, #ffffff 45%); }
+        .alert-item.sev-critical { border-left-color: #dd6b20; background: linear-gradient(90deg, #fffaf0 0%, #ffffff 45%); }
+        .alert-item.sev-low { border-left-color: #ecc94b; background: linear-gradient(90deg, #fffef5 0%, #ffffff 45%); }
+        .alert-item .alert-icon { font-size: 22px; flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .alert-item.sev-out .alert-icon { background: #fed7d7; }
+        .alert-item.sev-critical .alert-icon { background: #feebc8; }
+        .alert-item.sev-low .alert-icon { background: #fefcbf; }
+        .alert-item .alert-info { flex: 1; min-width: 0; }
+        .alert-item .alert-name { font-weight: 700; font-size: 14px; color: #2d3748; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .alert-item .alert-meta { font-size: 12px; color: #718096; margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .alert-item .alert-meta b { color: #2d3748; }
+        .stock-bar { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin-top: 6px; width: 100%; }
+        .stock-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+        .bar-out { background: linear-gradient(90deg, #fc8181, #e53e3e); }
+        .bar-critical { background: linear-gradient(90deg, #f6ad55, #dd6b20); }
+        .bar-low { background: linear-gradient(90deg, #f6e05e, #d69e2e); }
+        .alert-item .restock-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; border: none; transition: all 0.2s; background: linear-gradient(135deg, #48bb78, #2f855a); color: white; box-shadow: 0 4px 12px rgba(72,187,120,0.35); }
+        .alert-item .restock-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(72,187,120,0.5); }
+        .no-alerts { text-align: center; padding: 44px 20px; color: #38a169; font-weight: 700; font-size: 15px; background: #f0fff4; border-radius: 12px; }
+        .no-alerts .big-icon { font-size: 46px; display: block; margin-bottom: 10px; }
+        .alert-footer { padding: 12px 22px; text-align: center; font-size: 12px; color: #718096; background: #f7fafc; border-top: 1px solid #e2e8f0; }
+
+        /* CHARTS */
+        .chart-container { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 22px; }
+        .chart-box { background: white; padding: 22px; border-radius: 18px; box-shadow: 0 6px 24px rgba(0,0,0,0.07); }
+        .chart-box h3 { font-size: 15px; margin-bottom: 15px; color: #2d3748; font-weight: 800; }
+        .chart-box canvas { width: 100% !important; height: 280px !important; }
+
+        /* CATEGORY */
+        .category-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+        .category-kpi { background: linear-gradient(135deg, #f7fafc, #edf2f7); border-radius: 12px; padding: 14px 16px; border-left: 4px solid #667eea; transition: all 0.25s; }
+        .category-kpi:hover { transform: translateY(-3px); box-shadow: 0 10px 22px rgba(102,126,234,0.18); }
+        .category-kpi .ck-name { font-size: 12px; color: #4a5568; font-weight: 700; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .category-kpi .ck-value { font-size: 22px; font-weight: 800; color: #2d3748; }
+
+        /* FORMS */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #4a5568; font-size: 13px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; transition: all 0.2s; background: #f8fafc; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #667eea; background: white; box-shadow: 0 0 0 3px rgba(102,126,234,0.12); }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        /* BUTTONS */
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.25s; font-size: 14px; }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102,126,234,0.4); }
+        .btn-success { background: linear-gradient(135deg, #48bb78, #2f855a); color: white; }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(72,187,120,0.4); }
+        .btn-danger { background: linear-gradient(135deg, #fc8181, #c53030); color: white; }
+        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(229,62,62,0.4); }
+        .btn-warning { background: linear-gradient(135deg, #ed8936, #dd6b20); color: white; }
+        .btn-warning:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(237,137,54,0.4); }
+        .btn-info { background: linear-gradient(135deg, #4299e1, #2b6cb0); color: white; }
+        .btn-info:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(66,153,225,0.4); }
+        .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-group .btn { flex: 1; min-width: 100px; }
+
+        /* TABLES */
+        .table-container { overflow-x: auto; border-radius: 12px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        table thead { background: #f7fafc; }
+        table th { padding: 12px; text-align: left; font-weight: 800; color: #4a5568; border-bottom: 2px solid #e2e8f0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; }
+        table td { padding: 12px; border-bottom: 1px solid #edf2f7; }
+        table tbody tr { transition: background 0.15s; }
+        table tbody tr:hover { background: #f7fafc; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; letter-spacing: 0.3px; }
+        .badge-success { background: #c6f6d5; color: #22543d; }
+        .badge-danger { background: #fed7d7; color: #742a2a; }
+        .badge-warning { background: #feebc8; color: #7b341e; }
+        .badge-info { background: #bee3f8; color: #2a4365; }
+        .search-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-bar input, .search-bar select { flex: 1; min-width: 150px; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; background: #f8fafc; }
+        .search-bar input:focus, .search-bar select:focus { outline: none; border-color: #667eea; background: white; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+
+        /* MODAL / TOAST */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); z-index: 1000; justify-content: center; align-items: center; padding: 20px; overflow-y: auto; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 18px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; animation: slideDown 0.3s; margin: auto; }
+        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { font-size: 20px; font-weight: 800; }
+        .modal-close { background: none; border: none; font-size: 26px; cursor: pointer; color: #a0aec0; line-height: 1; }
+        .modal-close:hover { color: #2d3748; }
+        .toast { position: fixed; bottom: 24px; right: 24px; background: #2d3748; color: white; padding: 15px 25px; border-radius: 12px; z-index: 2000; transform: translateX(120%); transition: transform 0.3s; max-width: 420px; box-shadow: 0 10px 34px rgba(0,0,0,0.3); font-weight: 600; }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: linear-gradient(135deg, #48bb78, #2f855a); }
+        .toast.error { background: linear-gradient(135deg, #fc8181, #c53030); }
+        .toast.info { background: linear-gradient(135deg, #4299e1, #2b6cb0); }
+
+        /* USERS */
+        .users-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-top: 14px; }
+        .user-card { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; transition: all 0.2s; }
+        .user-card:hover { border-color: #667eea; background: #edf2ff; box-shadow: 0 4px 12px rgba(102,126,234,0.1); }
+        .user-card .u-info { flex: 1; min-width: 0; }
+        .user-card .u-name { font-weight: 700; color: #2d3748; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-card .u-role { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; margin-top: 2px; }
+        .user-card .u-role.admin { color: #c53030; }
+        .user-card .u-role.viewer { color: #2b6cb0; }
+        .user-card .btn-sm { padding: 5px 10px; font-size: 11px; }
+
+        /* REMEMBERED DEVICES */
+        .devices-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+        .device-card {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 12px; padding: 12px 16px;
+            background: #f0fff4; border: 1px solid #9ae6b4;
+            border-radius: 10px; transition: all 0.2s;
+        }
+        .device-card:hover { border-color: #48bb78; box-shadow: 0 4px 12px rgba(72,187,120,0.15); }
+        .device-card .d-info { flex: 1; min-width: 0; }
+        .device-card .d-user {
+            font-weight: 800; font-size: 13px; color: #22543d;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .device-card .d-user .d-badge {
+            font-size: 10px; font-weight: 800; padding: 2px 8px;
+            border-radius: 10px; background: #c6f6d5; color: #22543d;
+            text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .device-card .d-meta {
+            font-size: 11px; color: #4a5568; margin-top: 3px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .device-card .btn-sm { padding: 5px 10px; font-size: 11px; }
+        .no-devices {
+            padding: 20px; text-align: center;
+            color: #718096; font-size: 13px;
+            background: #f7fafc; border-radius: 10px;
+            border: 1px dashed #cbd5e0;
+        }
+
+        /* CLOUD */
+        .cloud-panel { background: linear-gradient(135deg, #ebf4ff 0%, #e6fffa 100%); border: 1px solid #bee3f8; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
+        .cloud-panel .cloud-title { font-weight: 800; font-size: 14px; color: #2c5282; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .cloud-status { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; background: #edf2f7; color: #4a5568; margin-bottom: 12px; }
+        .cloud-status.connected { background: #c6f6d5; color: #22543d; }
+        .cloud-status.syncing   { background: #feebc8; color: #7b341e; }
+        .cloud-status.error     { background: #fed7d7; color: #822727; }
+        .cloud-status.offline   { background: #e2e8f0; color: #4a5568; }
+        .cloud-status .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+        .cloud-status.connected .dot { background: #38a169; animation: cloudPulse 2s infinite; }
+        .cloud-status.syncing   .dot { background: #dd6b20; animation: cloudPulse 0.8s infinite; }
+        .cloud-status.error     .dot { background: #e53e3e; }
+        @keyframes cloudPulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } }
+        .cloud-last-sync { font-size: 12px; color: #4a5568; margin-bottom: 12px; font-weight: 600; }
+        .cloud-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .cloud-buttons .btn { flex: 1; min-width: 130px; }
+        .auto-sync-toggle { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: white; border-radius: 10px; margin-top: 12px; border: 1px solid #bee3f8; cursor: pointer; user-select: none; }
+        .auto-sync-toggle input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: #667eea; }
+        .auto-sync-toggle label { flex: 1; font-size: 13px; font-weight: 700; color: #2d3748; cursor: pointer; margin: 0; }
+        .auto-sync-toggle .hint { font-size: 11px; color: #718096; font-weight: 500; display: block; margin-top: 2px; }
+
+        /* FIREBASE DIAGNOSTIC */
+        .fb-diag { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 12px; font-family: 'Courier New', monospace; color: #4a5568; }
+        .fb-diag .row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed #e2e8f0; }
+        .fb-diag .row:last-child { border-bottom: none; }
+        .fb-diag .key { color: #718096; font-weight: 700; }
+        .fb-diag .val { color: #2d3748; font-weight: 700; text-align: right; max-width: 70%; word-break: break-all; }
+
+        /* STORE KEY STATUS */
+        .store-key-status { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 12px; background: linear-gradient(135deg, #f0fff4, #e6fffa); border: 1px solid #9ae6b4; margin-top: 12px; }
+        .store-key-status .sk-info { flex: 1; }
+        .store-key-status .sk-title { font-weight: 700; font-size: 13px; color: #22543d; }
+        .store-key-status .sk-value { font-family: 'Courier New', monospace; font-weight: 700; color: #2c5282; font-size: 14px; margin-top: 3px; letter-spacing: 1px; }
+        .store-key-status .sk-badge { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 12px; background: #c6f6d5; color: #22543d; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* EXCEL SYNC */
+        .sync-panel { background: #f7fafc; border: 2px dashed #cbd5e0; border-radius: 10px; padding: 20px; margin-bottom: 15px; }
+        .sync-option { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; margin-bottom: 8px; background: white; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+        .sync-option:hover { border-color: #cbd5e0; }
+        .sync-option.selected { border-color: #667eea; background: #edf2ff; }
+        .sync-option input[type="radio"] { margin: 0; }
+        .sync-option .opt-title { font-weight: 700; font-size: 14px; }
+        .sync-option .opt-desc { font-size: 12px; color: #666; margin-top: 2px; }
+        .sync-preview { margin-top: 15px; max-height: 250px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; background: white; }
+        .sync-preview table { font-size: 13px; }
+        .diff-add { color: #22543d; font-weight: 800; }
+        .diff-update { color: #7b341e; font-weight: 800; }
+        .diff-same { color: #718096; }
+        .excel-info { background: #e6fffa; border-left: 4px solid #38b2ac; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; color: #234e52; }
+
+        @media (max-width: 900px) { .chart-container { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+            .form-row { grid-template-columns: 1fr; }
+            .nav button { font-size: 12px; padding: 8px 12px; }
+            .header h1 { font-size: 17px; }
+            .modal-content { padding: 22px; }
+            .alert-item { flex-wrap: wrap; }
+            .login-box { padding: 30px 22px 26px; }
+            .login-signature { font-size: 40px; }
+            .header-user { padding: 6px 10px; gap: 8px; }
+            .header-user .info { display: none; }
+        }
+        @media (max-width: 480px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .btn-group { flex-direction: column; }
+            .btn-group .btn { width: 100%; }
+            .alert-header { padding: 14px 16px; }
+            .alert-list { padding: 12px 14px 16px; }
+            .login-brand h2 { font-size: 17px; }
+            .login-signature { font-size: 36px; }
+            .kpi-card .kpi-value { font-size: 28px; }
+        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN -->
+    <div id="loginOverlay">
+        <div class="login-box">
+            <div class="login-brand">
+                <div class="login-lock">🔐</div>
+                <h2>Daily Consumables<br><span class="accent">Management System</span></h2>
+                <div class="byline">Created / Developed by</div>
+                <div class="login-signature">Shibu Bera</div>
+            </div>
+            <div class="field-group">
+                <label for="loginUsername">Username</label>
+                <input type="text" id="loginUsername" placeholder="Enter your username" autocomplete="username" autofocus>
+            </div>
+            <div class="field-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+            </div>
+            <div class="login-error" id="loginError">Incorrect username or password</div>
+            <button class="btn btn-primary" onclick="handleLogin()">🔓 Sign In</button>
+            <div class="login-hint">
+                <b>Default credentials</b><br>
+                Admin: <span class="cred">admin</span> / <span class="cred">admin123</span><br>
+                Viewer: <span class="cred">viewer</span> / <span class="cred">viewer123</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- STORE KEY -->
+    <div id="storeKeyOverlay">
+        <div class="store-key-box">
+            <div class="store-key-icon">🔑</div>
+            <h2>Store Key Activation</h2>
+            <div class="store-key-userline" id="storeKeyUserLine">Signing in as: —</div>
+            <p class="sub">Enter the store key provided by the administrator to unlock the dashboard.</p>
+
+            <div class="field-group">
+                <label for="storeKeyInput">Store Key</label>
+                <input type="password" id="storeKeyInput" placeholder="•••••••••••••" autocomplete="off">
+            </div>
+
+            <label class="remember-option" id="rememberOption">
+                <input type="checkbox" id="rememberDeviceCheck">
+                <div class="rem-text">
+                    ✅ Remember this device
+                    <span class="rem-sub">You won't need to enter the store key again on this device until the admin clears it.</span>
+                </div>
+            </label>
+
+            <div class="store-key-error" id="storeKeyError">Invalid store key. Please try again.</div>
+            <button class="btn btn-warning" onclick="submitStoreKey()">🔓 Activate</button>
+
+            <div class="store-key-hint">This store key is set and managed by your <b>Administrator</b>.<br>Contact them if you don't have one.</div>
+        </div>
+    </div>
+
+    <!-- APP -->
+    <div id="app" style="display: none;">
+        <div class="header">
+            <div>
+                <h1>📦 Daily Consumables Management System</h1>
+                <div class="subtitle">Created / Developed by <span class="author">Shibu Bera</span></div>
+            </div>
+            <div class="header-user">
+                <div class="avatar" id="userAvatar">A</div>
+                <div class="info">
+                    <div class="name" id="userNameDisplay">Admin</div>
+                    <div class="role" id="userRoleDisplay">Administrator</div>
+                </div>
+                <button class="btn-logout" onclick="logoutUser()">Logout</button>
+            </div>
+        </div>
+
+        <div class="readonly-banner" id="readonlyBanner">👁️ View-Only Mode — you can browse data but cannot modify anything.</div>
+
+        <div class="nav" id="navigation">
+            <button class="active" data-section="dashboard">📊 Dashboard</button>
+            <button data-section="management">📋 Management</button>
+            <button data-section="receipt">📥 Receipt</button>
+            <button data-section="issue">📤 Issue</button>
+            <button data-section="settings">⚙️ Settings</button>
+        </div>
+
+        <div class="container">
+            <!-- DASHBOARD -->
+            <div id="dashboard" class="section active">
+                <div class="dashboard-grid" id="kpiGrid">
+                    <div class="kpi-card kpi-purple"><div class="kpi-icon">📦</div><div class="kpi-value" id="totalMaterials">0</div><div class="kpi-label">Total Materials</div></div>
+                    <div class="kpi-card kpi-blue"><div class="kpi-icon">📊</div><div class="kpi-value" id="totalQuantity">0</div><div class="kpi-label">Total Quantity</div></div>
+                    <div class="kpi-card kpi-red" id="reorderKpiCard"><div class="kpi-icon">⚠️</div><div class="kpi-value" id="reorderCount">0</div><div class="kpi-label">Reorder Alerts</div></div>
+                    <div class="kpi-card kpi-orange"><div class="kpi-icon">📈</div><div class="kpi-value" id="monthlyConsumption">0</div><div class="kpi-label">Monthly Consumption</div></div>
+                    <div class="kpi-card kpi-green"><div class="kpi-icon">📉</div><div class="kpi-value" id="avgDailyConsumption">0</div><div class="kpi-label">Avg Daily Consumption</div></div>
+                </div>
+
+                <div class="alert-panel">
+                    <div class="alert-header">
+                        <h3><span class="pulse-dot"></span> Stock Alerts — Action Required</h3>
+                        <div class="alert-pills" id="alertSummary"></div>
+                    </div>
+                    <div class="alert-list" id="alertList"><div class="no-alerts">Loading…</div></div>
+                    <div class="alert-footer" id="alertFooter"></div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-box"><h3>🥧 Material Distribution</h3><canvas id="pieChart"></canvas></div>
+                    <div class="chart-box"><h3>📊 Monthly Consumption Trend</h3><canvas id="barChart"></canvas></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📊 Category-wise Monthly Consumption</div>
+                    <div class="category-kpi-grid" id="categoryKpi"></div>
+                </div>
+            </div>
+
+            <!-- MANAGEMENT -->
+            <div id="management" class="section">
+                <div class="card">
+                    <div class="card-title">📋 Materials Management</div>
+                    <div class="search-bar">
+                        <input type="text" id="searchMaterials" placeholder="Search materials by name...">
+                        <button class="btn btn-primary" onclick="searchMaterials()">🔍 Search</button>
+                        <button class="btn btn-success admin-only" onclick="showAddMaterial()">➕ Add Material</button>
+                        <button class="btn btn-info" onclick="exportData('management')">📤 Export</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>ID</th><th>Name</th><th>Quantity</th><th>Unit</th><th>Reorder Level</th><th>Status</th><th class="admin-only">Actions</th></tr></thead>
+                            <tbody id="materialsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECEIPT -->
+            <div id="receipt" class="section">
+                <div class="card admin-only">
+                    <div class="card-title">📥 Materials Receipt</div>
+                    <form id="receiptForm" onsubmit="handleReceipt(event)">
+                        <div class="form-row">
+                            <div class="form-group"><label>Material Name *</label><select id="receiptMaterial" required><option value="">Select Material</option></select></div>
+                            <div class="form-group"><label>Vendor Name *</label><input type="text" id="vendorName" required placeholder="Enter vendor name"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Quantity *</label><input type="number" id="receiptQuantity" required step="0.01" min="0.01" placeholder="Enter quantity"></div>
+                            <div class="form-group"><label>Receipt Date</label><input type="date" id="receiptDate"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Receipt Time (Auto)</label><input type="time" id="receiptTime" readonly></div>
+                            <div class="form-group"><label>Received By *</label><input type="text" id="receivedBy" required placeholder="Enter name"></div>
+                        </div>
+                        <div class="form-group"><label>Invoice Number</label><input type="text" id="invoiceNumber" placeholder="Enter invoice number"></div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-success">✅ Save Receipt</button>
+                            <button type="button" class="btn btn-info" onclick="exportData('receipt')">📤 Export</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card">
+                    <div class="card-title">📋 Recent Receipts</div>
+                    <div class="search-bar">
+                        <input type="text" id="searchReceipts" placeholder="Search receipts...">
+                        <input type="date" id="receiptFilterDate">
+                        <button class="btn btn-primary" onclick="searchReceipts()">🔍 Filter</button>
+                        <button class="btn btn-success" onclick="generateReport('receipt')">📄 PDF</button>
+                        <button class="btn btn-info" onclick="exportExcel('receipt')">📊 Excel</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Date</th><th>Time</th><th>Material</th><th>Vendor</th><th>Quantity</th><th>Received By</th><th class="admin-only">Actions</th></tr></thead>
+                            <tbody id="receiptsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ISSUE -->
+            <div id="issue" class="section">
+                <div class="card admin-only">
+                    <div class="card-title">📤 Materials Issue</div>
+                    <form id="issueForm" onsubmit="handleIssue(event)">
+                        <div class="form-row">
+                            <div class="form-group"><label>Material Name *</label><select id="issueMaterial" required><option value="">Select Material</option></select></div>
+                            <div class="form-group"><label>Quantity *</label><input type="number" id="issueQuantity" required step="0.01" min="0.01" placeholder="Enter quantity"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Issued To *</label><input type="text" id="issuedTo" required placeholder="Enter name"></div>
+                            <div class="form-group"><label>Issued By *</label><input type="text" id="issuedBy" required placeholder="Enter name"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Challan No</label><input type="text" id="challanNo" placeholder="Enter challan number"></div>
+                            <div class="form-group"><label>Issue Date</label><input type="date" id="issueDate"></div>
+                        </div>
+                        <div class="form-group"><label>Remarks</label><textarea id="issueRemarks" placeholder="Enter any remarks"></textarea></div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-warning">📤 Issue Material</button>
+                            <button type="button" class="btn btn-info" onclick="exportData('issue')">📤 Export</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card">
+                    <div class="card-title">📋 Recent Issues</div>
+                    <div class="search-bar">
+                        <input type="text" id="searchIssues" placeholder="Search issues...">
+                        <input type="date" id="issueFilterDate">
+                        <button class="btn btn-primary" onclick="searchIssues()">🔍 Filter</button>
+                        <button class="btn btn-success" onclick="generateReport('issue')">📄 PDF</button>
+                        <button class="btn btn-info" onclick="exportExcel('issue')">📊 Excel</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Date</th><th>Material</th><th>Quantity</th><th>Issued To</th><th>Issued By</th><th>Challan No</th><th class="admin-only">Actions</th></tr></thead>
+                            <tbody id="issuesTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SETTINGS -->
+            <div id="settings" class="section">
+                <div class="card">
+                    <div class="card-title">⚙️ Settings <span style="font-size: 11px; background: #fed7d7; color: #822727; padding: 3px 8px; border-radius: 10px; margin-left: 8px; font-weight: 800;">ADMIN ONLY</span></div>
+
+                    <!-- STORE KEY -->
+                    <div class="form-group">
+                        <label style="font-size: 15px; color: #2d3748; margin-bottom: 8px;">🔑 Store Key Management</label>
+                        <div class="excel-info" style="background: #fffaf0; border-left-color: #ed8936; color: #7b341e;">
+                            The store key is used to <b>activate access</b> to the dashboard after login. Users can choose to remember the key on their device so they only enter it once.
+                        </div>
+                        <div class="store-key-status">
+                            <div class="sk-info">
+                                <div class="sk-title">Current Store Key</div>
+                                <div class="sk-value" id="currentStoreKeyDisplay">—</div>
+                            </div>
+                            <span class="sk-badge">Active</span>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;">
+                            <input type="text" id="newStoreKey" placeholder="Enter new store key (min 6 chars)" style="flex: 1; min-width: 200px; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Courier New', monospace;">
+                            <button class="btn btn-warning" onclick="updateStoreKey()">💾 Update Store Key</button>
+                        </div>
+                    </div>
+
+                    <hr style="margin: 20px 0;">
+
+                    <!-- REMEMBERED DEVICES -->
+                    <div class="form-group">
+                        <label style="font-size: 15px; color: #2d3748; margin-bottom: 8px;">💾 Remembered Devices (One-Time Store Key)</label>
+                        <div class="excel-info" style="background: #e6fffa; border-left-color: #38b2ac; color: #234e52;">
+                            Users who checked <b>“Remember this device”</b> are listed here. They skip the store key screen until you clear their device.
+                        </div>
+                        <div class="devices-list" id="devicesList">
+                            <div class="no-devices">No devices have been remembered yet.</div>
+                        </div>
+                        <div style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn btn-danger" onclick="clearAllRememberedDevices()">🗑️ Clear All Remembered Devices</button>
+                        </div>
+                    </div>
+
+                    <hr style="margin: 20px 0;">
+
+                    <!-- USER MGMT -->
+                    <div class="form-group">
+                        <label style="font-size: 15px; color: #2d3748; margin-bottom: 8px;">👥 User Management</label>
+                        <div class="excel-info" style="background: #e6fffa; border-left-color: #38b2ac; color: #234e52;">
+                            Create users with a <b>Viewer</b> role to give read-only dashboard access, or <b>Admin</b> role for full access.
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;">
+                            <input type="text" id="newUsername" placeholder="Username" style="flex: 1; min-width: 140px; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;">
+                            <input type="text" id="newUserPassword" placeholder="Password (min 4)" style="flex: 1; min-width: 140px; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;">
+                            <select id="newUserRole" style="flex: 1; min-width: 130px; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;">
+                                <option value="viewer">👁️ Viewer (Read-Only)</option>
+                                <option value="admin">🔧 Admin (Full Access)</option>
+                            </select>
+                            <button class="btn btn-success" onclick="addUser()">➕ Add User</button>
+                        </div>
+                        <div class="users-grid" id="usersGrid"></div>
+                    </div>
+
+                    <hr style="margin: 20px 0;">
+
+                    <!-- PASSWORDS -->
+                    <div class="form-group">
+                        <label>Change Settings Access Password</label>
+                        <input type="password" id="settingsPassword" placeholder="Enter new password">
+                        <button class="btn btn-primary" onclick="updateSettingsPassword()" style="margin-top: 10px;">Update Password</button>
+                    </div>
+
+                    <hr style="margin: 20px 0;">
+
+                    <div class="form-group">
+                        <label>Change Reversal Admin Password</label>
+                        <input type="password" id="reversalPassword" placeholder="Enter new password">
+                        <button class="btn btn-primary" onclick="updateReversalPassword()" style="margin-top: 10px;">Update Password</button>
+                    </div>
+
+                    <hr style="margin: 20px 0;">
+
+                    <div class="form-group">
+                        <label>Change Password for Delete Operations</label>
+                        <input type="password" id="deletePassword" placeholder="Enter new password">
+                        <button class="btn btn-primary" onclick="updateDeletePassword()" style="margin-top: 10px;">Update Password</button>
+                    </div>
+
+                    <hr style="margin: 20px 0;">
+
+                    <!-- CLOUD -->
+                    <div class="form-group">
+                        <label style="font-size: 15px; color: #2d3748; margin-bottom: 8px;">☁️ Cloud Sync (Firebase)</label>
+                        <div class="cloud-panel">
+                            <div class="cloud-title">🔥 Firebase Realtime Database — daily-consumables-data</div>
+                            <div class="cloud-status offline" id="cloudStatus">
+                                <span class="dot"></span>
+                                <span id="cloudStatusText">Not connected</span>
+                            </div>
+                            <div class="cloud-last-sync" id="cloudLastSync">Last sync: —</div>
+                            <div class="cloud-buttons">
+                                <button class="btn btn-primary" onclick="cloudPushAll()">⬆️ Push to Cloud</button>
+                                <button class="btn btn-info" onclick="cloudPullAll()">⬇️ Pull from Cloud</button>
+                                <button class="btn btn-success" onclick="cloudTestConnection()">🔌 Test Connection</button>
+                            </div>
+                            <label class="auto-sync-toggle">
+                                <input type="checkbox" id="autoSyncToggle" onchange="toggleAutoSync()">
+                                <div>
+                                    <label for="autoSyncToggle" style="padding:0;">🔄 Live Auto-Sync</label>
+                                    <span class="hint">Automatically push local changes &amp; receive cloud updates in real time.</span>
+                                </div>
+                            </label>
+                            <div class="fb-diag" id="fbDiag">
+                                <div class="row"><span class="key">Project</span><span class="val" id="diagProject">—</span></div>
+                                <div class="row"><span class="key">Database URL</span><span class="val" id="diagDbUrl">—</span></div>
+                                <div class="row"><span class="key">SDK Status</span><span class="val" id="diagSdk">—</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr style="margin: 20px 0;">
+
+                    <!-- EXCEL SYNC -->
+                    <div class="form-group">
+                        <label style="font-size: 15px; color: #2d3748; margin-bottom: 8px;">📊 Sync Materials from Excel</label>
+                        <div class="excel-info">
+                            Upload your inventory workbook (<b>.xlsx</b>, <b>.xls</b> or <b>.csv</b>).
+                            Expected columns: <b>Spare Name</b>, <b>Available</b>, <b>Reorder Level</b>.
+                        </div>
+                        <div class="sync-panel">
+                            <input type="file" id="excelSyncFile" accept=".xlsx,.xls,.csv,.json" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; width: 100%; background: white;">
+                            <div style="margin-top: 15px;">
+                                <div style="font-weight: 700; margin-bottom: 8px; font-size: 14px;">Choose sync mode:</div>
+                                <label class="sync-option selected" data-mode="merge">
+                                    <input type="radio" name="syncMode" value="merge" checked>
+                                    <div><div class="opt-title">🔄 Merge &amp; Update</div><div class="opt-desc">Update existing, add new. Keeps history.</div></div>
+                                </label>
+                                <label class="sync-option" data-mode="replace">
+                                    <input type="radio" name="syncMode" value="replace">
+                                    <div><div class="opt-title">♻️ Replace All</div><div class="opt-desc">Delete materials, use Excel contents.</div></div>
+                                </label>
+                                <label class="sync-option" data-mode="addonly">
+                                    <input type="radio" name="syncMode" value="addonly">
+                                    <div><div class="opt-title">➕ Add Only (skip existing)</div><div class="opt-desc">Only add new materials.</div></div>
+                                </label>
+                            </div>
+                            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button class="btn btn-primary" onclick="previewExcelSync()">👁️ Preview Sync</button>
+                                <button class="btn btn-success" onclick="applyExcelSync()" id="applySyncBtn" disabled style="opacity:0.5;">✅ Apply Sync</button>
+                                <button class="btn btn-info" onclick="cancelExcelSync()">↩️ Cancel</button>
+                            </div>
+                        </div>
+                        <div id="syncPreviewContainer" style="display: none;">
+                            <div class="card-title" style="font-size: 15px; margin-bottom: 10px;">📋 Sync Preview</div>
+                            <div class="sync-preview">
+                                <table><thead><tr><th>Material</th><th>Current Qty</th><th>New Qty</th><th>Change</th></tr></thead><tbody id="syncPreviewBody"></tbody></table>
+                            </div>
+                            <div id="syncSummary" style="margin-top: 10px; font-size: 13px; color: #4a5568; padding: 10px; background: #edf2ff; border-radius: 8px;"></div>
+                        </div>
+                    </div>
+
+                    <hr style="margin: 20px 0;">
+
+                    <div class="form-group">
+                        <label>Data Management</label>
+                        <div class="btn-group">
+                            <button class="btn btn-success" onclick="saveData()">💾 Save All Data</button>
+                            <button class="btn btn-info" onclick="exportAllData()">📤 Export All Data</button>
+                            <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
+                        </div>
+                    </div>
+
+                    <hr style="margin: 20px 0;">
+
+                    <div class="form-group">
+                        <label>Upload Full Backup (JSON)</label>
+                        <input type="file" id="uploadFile" accept=".json,.csv,.xlsx,.xls">
+                        <button class="btn btn-primary" onclick="uploadData()" style="margin-top: 10px;">📤 Upload Backup</button>
+                    </div>
+
+                    <hr style="margin: 20px 0;">
+
+                    <div class="form-group">
+                        <label>Manual Consumption Adjustment</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <select id="manualMaterial" style="flex:1; min-width:150px; padding: 10px 12px; border:1px solid #ddd; border-radius:8px;"></select>
+                            <input type="number" id="manualQuantity" placeholder="Qty" step="0.01" style="flex:1; min-width:100px; padding: 10px 12px; border:1px solid #ddd; border-radius:8px;">
+                            <button class="btn btn-warning" onclick="manualConsume()">📉 Consume</button>
+                        </div>
+                    </div>
+
+                    <hr style="margin: 20px 0;">
+
+                    <div class="form-group">
+                        <label>About</label>
+                        <p style="color: #666; line-height: 1.7;">
+                            <strong>Daily Consumables Management System v4.2</strong><br>
+                            Created / Developed by <span style="font-family:'Great Vibes', cursive; font-size: 22px; color:#4c51bf;">Shibu Bera</span><br>
+                            Multi-user access, cloud-synced via Firebase, store-key protected.<br>
+                            Firebase project: <code>daily-consumables-data</code>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Material</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="modalForm" onsubmit="handleModalSubmit(event)">
+                <input type="hidden" id="editId" value="">
+                <div class="form-group"><label>Material Name *</label><input type="text" id="modalName" required placeholder="Enter material name"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Quantity *</label><input type="number" id="modalQuantity" required step="0.01" min="0" placeholder="0"></div>
+                    <div class="form-group"><label>Unit *</label><input type="text" id="modalUnit" required placeholder="e.g., kg, ltr, pcs"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Reorder Level *</label><input type="number" id="modalReorder" required step="0.01" min="0" placeholder="0"></div>
+                    <div class="form-group"><label>Min Stock Level</label><input type="number" id="modalMinStock" step="0.01" min="0" placeholder="0"></div>
+                </div>
+                <div class="form-group"><label>Max Stock Level</label><input type="number" id="modalMaxStock" step="0.01" min="0" placeholder="0"></div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">💾 Save</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
+    <!-- Chart.js & SheetJS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <script>
+        // ===================== FIREBASE CONFIG (daily-consumables-data) =====================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCdnCQJ69YZRJ-6jH5GXU-dzW_40AoO_3w",
+            authDomain: "daily-consumables-data.firebaseapp.com",
+            databaseURL: "https://daily-consumables-data-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "daily-consumables-data",
+            storageBucket: "daily-consumables-data.firebasestorage.app",
+            messagingSenderId: "853779146296",
+            appId: "1:853779146296:web:dbf392e5a2b8a4d36b28cd",
+            measurementId: "G-6M4MDMDGH9"
+        };
+
+        let firebaseApp = null;
+        let firebaseDb = null;
+        let firebaseInitError = null;
+        const CLOUD_PATH = 'mms_data';
+
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            firebaseDb = firebase.database();
+            console.log('🔥 Firebase initialized (daily-consumables-data)');
+        } catch (e) {
+            firebaseInitError = e;
+            console.error('Firebase init failed:', e);
+        }
+
+        // ===================== STATE =====================
+        let materials = JSON.parse(localStorage.getItem('materials')) || [];
+        let receipts = JSON.parse(localStorage.getItem('receipts')) || [];
+        let issues = JSON.parse(localStorage.getItem('issues')) || [];
+        let settings = JSON.parse(localStorage.getItem('settings')) || {
+            deletePassword: 'admin123',
+            settingsPassword: 'admin123',
+            reversalPassword: 'admin123',
+            storeKey: 'STORE2024'
+        };
+        if (!settings.settingsPassword) settings.settingsPassword = 'admin123';
+        if (!settings.reversalPassword) settings.reversalPassword = 'admin123';
+        if (!settings.deletePassword) settings.deletePassword = 'admin123';
+        if (!settings.storeKey) settings.storeKey = 'STORE2024';
+
+        let users = JSON.parse(localStorage.getItem('users')) || [
+            { username: 'admin', password: 'admin123', role: 'admin', createdAt: Date.now() },
+            { username: 'viewer', password: 'viewer123', role: 'viewer', createdAt: Date.now() }
+        ];
+
+        // Remembered devices — array of { username, deviceId, deviceLabel, rememberedAt }
+        let rememberedDevices = JSON.parse(localStorage.getItem('rememberedDevices')) || [];
+
+        let currentUser = null;
+        let storeKeyActivated = false;
+        let isAdmin = false;
+        let isViewer = false;
+        let pendingStoreKeyUser = null; // user object waiting for store key entry
+
+        let pieChartInstance = null;
+        let barChartInstance = null;
+        let pendingSync = { parsedRows: null, mode: 'merge', preview: null };
+
+        let autoSyncEnabled = false;
+        let cloudListenerRef = null;
+        let pushDebounceTimer = null;
+        let lastLocalChange = 0;
+        let lastAppliedFromCloud = 0;
+        let lastSyncedAt = null;
+        let suppressPush = false;
+
+        // ===================== DEVICE ID =====================
+        function getDeviceId() {
+            let id = localStorage.getItem('deviceId');
+            if (!id) {
+                id = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+                localStorage.setItem('deviceId', id);
+            }
+            return id;
+        }
+
+        function getDeviceLabel() {
+            const ua = navigator.userAgent || '';
+            let browser = 'Browser';
+            if (ua.includes('Edg/')) browser = 'Edge';
+            else if (ua.includes('Chrome/') && !ua.includes('Edg/')) browser = 'Chrome';
+            else if (ua.includes('Firefox/')) browser = 'Firefox';
+            else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari';
+
+            let os = 'Unknown OS';
+            if (ua.includes('Windows')) os = 'Windows';
+            else if (ua.includes('Mac OS')) os = 'macOS';
+            else if (ua.includes('Android')) os = 'Android';
+            else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+            else if (ua.includes('Linux')) os = 'Linux';
+
+            return `${browser} on ${os}`;
+        }
+
+        // ===================== LOGIN =====================
+        function handleLogin() {
+            const u = document.getElementById('loginUsername').value.trim();
+            const p = document.getElementById('loginPassword').value;
+            const err = document.getElementById('loginError');
+            const user = users.find(x => x.username === u && x.password === p);
+            if (!user) {
+                err.style.display = 'block';
+                err.textContent = 'Incorrect username or password';
+                return;
+            }
+            err.style.display = 'none';
+            currentUser = user;
+            isAdmin = user.role === 'admin';
+            isViewer = user.role === 'viewer';
+            sessionStorage.setItem('loggedInUser', JSON.stringify(user));
+
+            // Check if this device is already remembered for this user
+            const deviceId = getDeviceId();
+            const remembered = rememberedDevices.find(d => d.username === user.username && d.deviceId === deviceId);
+
+            if (remembered && settings.storeKey) {
+                // Skip store key screen
+                storeKeyActivated = true;
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('storeKeyOverlay').classList.remove('active');
+                document.getElementById('app').style.display = 'block';
+                initializeApp();
+                showToast(`👋 Welcome back, ${user.username}!`, 'success');
+                return;
+            }
+
+            // Show store key screen
+            pendingStoreKeyUser = user;
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('storeKeyOverlay').classList.add('active');
+            document.getElementById('storeKeyUserLine').textContent = `Signing in as: ${user.username} (${user.role})`;
+            document.getElementById('storeKeyInput').value = '';
+            document.getElementById('storeKeyError').style.display = 'none';
+            document.getElementById('rememberDeviceCheck').checked = user.role === 'viewer'; // default ON for viewers
+            document.getElementById('storeKeyInput').focus();
+        }
+        document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+        document.getElementById('loginUsername').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPassword').focus(); });
+
+        // ===================== STORE KEY =====================
+        function submitStoreKey() {
+            const input = document.getElementById('storeKeyInput').value.trim();
+            const err = document.getElementById('storeKeyError');
+            if (input !== settings.storeKey) {
+                err.style.display = 'block';
+                document.getElementById('storeKeyInput').value = '';
+                return;
+            }
+            err.style.display = 'none';
+
+            // Save remembered device if checked
+            const rememberChecked = document.getElementById('rememberDeviceCheck').checked;
+            if (rememberChecked && pendingStoreKeyUser) {
+                const deviceId = getDeviceId();
+                const exists = rememberedDevices.find(d => d.username === pendingStoreKeyUser.username && d.deviceId === deviceId);
+                if (!exists) {
+                    rememberedDevices.push({
+                        username: pendingStoreKeyUser.username,
+                        role: pendingStoreKeyUser.role,
+                        deviceId: deviceId,
+                        deviceLabel: getDeviceLabel(),
+                        rememberedAt: Date.now()
+                    });
+                    saveToLocalStorage();
+                }
+            }
+
+            storeKeyActivated = true;
+            document.getElementById('storeKeyOverlay').classList.remove('active');
+            document.getElementById('app').style.display = 'block';
+            initializeApp();
+        }
+        document.getElementById('storeKeyInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitStoreKey(); });
+
+        function logoutUser() {
+            if (!confirm('Log out of the system?')) return;
+            sessionStorage.removeItem('loggedInUser');
+            currentUser = null; isAdmin = false; isViewer = false; storeKeyActivated = false;
+            pendingStoreKeyUser = null;
+            if (autoSyncEnabled) disableAutoSync();
+            location.reload();
+        }
+
+        // ===================== INIT =====================
+        function initializeApp() {
+            applyRolePermissions();
+            setCurrentDateTime();
+            loadAllData();
+            setupNavigation();
+            setupAutoRefresh();
+            updateMaterialSelects();
+            updateManualSelect();
+            setupExcelSyncUI();
+            updateCloudStatus('offline', 'Not connected');
+            updateFirebaseDiagnostic();
+
+            if (isAdmin) {
+                document.getElementById('settingsPassword').value = settings.settingsPassword;
+                document.getElementById('reversalPassword').value = settings.reversalPassword;
+                document.getElementById('deletePassword').value = settings.deletePassword;
+                document.getElementById('currentStoreKeyDisplay').textContent = settings.storeKey;
+                renderUsersGrid();
+                renderRememberedDevices();
+            }
+        }
+
+        function updateFirebaseDiagnostic() {
+            const projEl = document.getElementById('diagProject');
+            const urlEl = document.getElementById('diagDbUrl');
+            const sdkEl = document.getElementById('diagSdk');
+            if (projEl) projEl.textContent = firebaseConfig.projectId || '—';
+            if (urlEl) urlEl.textContent = firebaseConfig.databaseURL || '❌ MISSING';
+            if (sdkEl) {
+                if (firebaseInitError) sdkEl.textContent = '❌ ' + firebaseInitError.message;
+                else if (firebaseDb) sdkEl.textContent = '✅ Ready';
+                else sdkEl.textContent = '❌ Not initialized';
+            }
+        }
+
+        function applyRolePermissions() {
+            document.getElementById('userAvatar').textContent = (currentUser.username || '?').charAt(0).toUpperCase();
+            document.getElementById('userNameDisplay').textContent = currentUser.username;
+            document.getElementById('userRoleDisplay').textContent = isAdmin ? 'Administrator' : 'Viewer (Read-Only)';
+            if (isViewer) document.getElementById('readonlyBanner').classList.add('show');
+            else document.getElementById('readonlyBanner').classList.remove('show');
+            document.querySelectorAll('.admin-only').forEach(el => { el.style.display = isAdmin ? '' : 'none'; });
+        }
+
+        function setupNavigation() {
+            document.querySelectorAll('.nav button').forEach(btn => {
+                btn.addEventListener('click', function() { navigateTo(this.dataset.section); });
+            });
+        }
+
+        function navigateTo(section) {
+            if (section === 'settings') {
+                if (!isAdmin) { showToast('⛔ Viewers cannot access Settings', 'error'); return; }
+                const pwd = prompt('Enter Settings Access Password:');
+                if (pwd !== settings.settingsPassword) { showToast('Incorrect settings password', 'error'); return; }
+            }
+            document.querySelectorAll('.nav button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.section === section) btn.classList.add('active');
+            });
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+            if (section === 'dashboard') updateDashboard();
+            if (section === 'management') renderMaterialsTable();
+            if (section === 'settings') updateManualSelect();
+        }
+
+        function setCurrentDateTime() {
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const timeStr = now.toTimeString().slice(0, 5);
+            document.querySelectorAll('input[type="date"]').forEach(i => { if (!i.value) i.value = dateStr; });
+            const t = document.getElementById('receiptTime'); if (t) t.value = timeStr;
+        }
+
+        function setupAutoRefresh() {
+            setInterval(() => {
+                setCurrentDateTime();
+                if (document.getElementById('dashboard').classList.contains('active')) updateDashboard();
+            }, 60000);
+        }
+
+        function loadAllData() {
+            updateDashboard();
+            renderMaterialsTable();
+            renderReceiptsTable();
+            renderIssuesTable();
+            updateMaterialSelects();
+            updateManualSelect();
+            renderCategoryKpi();
+        }
+
+        // ===================== DASHBOARD =====================
+        function updateDashboard() {
+            document.getElementById('totalMaterials').textContent = materials.length;
+            document.getElementById('totalQuantity').textContent = materials.reduce((s, m) => s + m.quantity, 0).toFixed(2);
+            const reorderCount = materials.filter(m => m.quantity <= m.reorderLevel).length;
+            document.getElementById('reorderCount').textContent = reorderCount;
+            const redCard = document.getElementById('reorderKpiCard');
+            if (reorderCount > 0) redCard.classList.add('alert-active');
+            else redCard.classList.remove('alert-active');
+
+            const now = new Date();
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monthly = issues.filter(i => new Date(i.date) >= startOfMonth);
+            const mc = monthly.reduce((s, i) => s + i.quantity, 0);
+            document.getElementById('monthlyConsumption').textContent = mc.toFixed(2);
+            document.getElementById('avgDailyConsumption').textContent = (mc / 30 || 0).toFixed(2);
+
+            updateCharts();
+            renderCategoryKpi();
+            renderStockAlerts();
+        }
+
+        function renderStockAlerts() {
+            const list = document.getElementById('alertList');
+            const summary = document.getElementById('alertSummary');
+            const footer = document.getElementById('alertFooter');
+
+            const out      = materials.filter(m => m.quantity === 0);
+            const critical = materials.filter(m => m.quantity > 0 && m.reorderLevel > 0 && m.quantity <= m.reorderLevel * 0.5);
+            const low      = materials.filter(m => m.quantity > m.reorderLevel * 0.5 && m.quantity <= m.reorderLevel);
+
+            summary.innerHTML = `
+                <span class="pill pill-red">🔴 ${out.length} Out of Stock</span>
+                <span class="pill pill-orange">🟠 ${critical.length} Critical</span>
+                <span class="pill pill-yellow">🟡 ${low.length} Low</span>
+            `;
+
+            const total = out.length + critical.length + low.length;
+            if (total === 0) {
+                list.innerHTML = `<div class="no-alerts"><span class="big-icon">✅</span>All materials are sufficiently stocked. No action needed.</div>`;
+                footer.textContent = '';
+                return;
+            }
+
+            const ordered = [...out.map(m => ({ m, sev: 'out' })), ...critical.map(m => ({ m, sev: 'critical' })), ...low.map(m => ({ m, sev: 'low' }))];
+
+            list.innerHTML = ordered.map(({ m, sev }) => {
+                const sevMeta = {
+                    out:      { icon: '🔴', label: 'OUT OF STOCK', cls: 'sev-out',      bar: 'bar-out' },
+                    critical: { icon: '🟠', label: 'CRITICAL',     cls: 'sev-critical', bar: 'bar-critical' },
+                    low:      { icon: '🟡', label: 'LOW STOCK',    cls: 'sev-low',      bar: 'bar-low' }
+                }[sev];
+                const reorderRef = m.reorderLevel > 0 ? m.reorderLevel : 1;
+                const pct = Math.max(0, Math.min(100, (m.quantity / reorderRef) * 100));
+                const restockBtn = isAdmin ? `<button class="restock-btn" onclick="goToReceipt('${escapeJs(m.name)}')">📥 Restock</button>` : '';
+                return `
+                    <div class="alert-item ${sevMeta.cls}">
+                        <div class="alert-icon">${sevMeta.icon}</div>
+                        <div class="alert-info">
+                            <div class="alert-name" title="${escapeHtml(m.name)}">${escapeHtml(m.name)}</div>
+                            <div class="alert-meta">
+                                <span><b>${m.quantity.toFixed(2)}</b> ${escapeHtml(m.unit || '')} in stock</span>
+                                <span>•</span>
+                                <span>Reorder at <b>${m.reorderLevel.toFixed(2)}</b></span>
+                                <span>•</span>
+                                <span style="color:${sev === 'out' ? '#c53030' : sev === 'critical' ? '#c05621' : '#975a16'}; font-weight:800;">${sevMeta.label}</span>
+                            </div>
+                            <div class="stock-bar"><div class="stock-bar-fill ${sevMeta.bar}" style="width: ${pct}%;"></div></div>
+                        </div>
+                        ${restockBtn}
+                    </div>
+                `;
+            }).join('');
+            footer.textContent = `Showing ${ordered.length} material${ordered.length > 1 ? 's' : ''} needing attention`;
+        }
+
+        function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+        function escapeJs(s) { return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+
+        function goToReceipt(materialName) {
+            if (isViewer) { showToast('⛔ Viewers cannot add receipts', 'error'); return; }
+            navigateTo('receipt');
+            setTimeout(() => {
+                const sel = document.getElementById('receiptMaterial');
+                if (sel) {
+                    sel.value = materialName;
+                    if (sel.value !== materialName) {
+                        const opt = document.createElement('option');
+                        opt.value = materialName; opt.textContent = materialName;
+                        sel.appendChild(opt); sel.value = materialName;
+                    }
+                }
+                document.getElementById('receiptQuantity').focus();
+            }, 150);
+        }
+
+        function renderCategoryKpi() {
+            const container = document.getElementById('categoryKpi');
+            container.innerHTML = '';
+            const now = new Date();
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const names = [...new Set(materials.map(m => m.name))];
+            const palette = ['#667eea','#4299e1','#48bb78','#ed8936','#f56565','#38b2ac','#805ad5','#d69e2e'];
+            names.forEach((name, i) => {
+                const total = issues.filter(x => x.materialName === name && new Date(x.date) >= startOfMonth).reduce((s, x) => s + x.quantity, 0);
+                const card = document.createElement('div');
+                card.className = 'category-kpi';
+                card.style.borderLeftColor = palette[i % palette.length];
+                card.innerHTML = `<div class="ck-name" title="${escapeHtml(name)}">${escapeHtml(name)}</div><div class="ck-value">${total.toFixed(2)}</div>`;
+                container.appendChild(card);
+            });
+            if (names.length === 0) container.innerHTML = '<p style="color:#999; padding: 10px;">No materials available</p>';
+        }
+
+        function updateCharts() {
+            const ctx1 = document.getElementById('pieChart').getContext('2d');
+            if (pieChartInstance) pieChartInstance.destroy();
+            const pieData = materials.slice(0, 5).map(m => ({ label: m.name, value: m.quantity }));
+            if (pieData.length === 0) pieData.push({ label: 'No Data', value: 1 });
+            pieChartInstance = new Chart(ctx1, {
+                type: 'doughnut',
+                data: { labels: pieData.map(d => d.label), datasets: [{ data: pieData.map(d => d.value), backgroundColor: ['#667eea','#48bb78','#ed8936','#fc8181','#4299e1'], borderWidth: 3, borderColor: '#fff', hoverOffset: 8 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 14, font: { size: 12, weight: '600' }, usePointStyle: true } } }, cutout: '60%' }
+            });
+            const ctx2 = document.getElementById('barChart').getContext('2d');
+            if (barChartInstance) barChartInstance.destroy();
+            const months = [], monthlyData = [];
+            const now = new Date();
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                months.push(d.toLocaleString('default', { month: 'short' }));
+                const mIssues = issues.filter(x => { const id = new Date(x.date); return id.getMonth() === d.getMonth() && id.getFullYear() === d.getFullYear(); });
+                monthlyData.push(mIssues.reduce((s, x) => s + x.quantity, 0));
+            }
+            barChartInstance = new Chart(ctx2, {
+                type: 'bar',
+                data: { labels: months, datasets: [{ label: 'Consumption', data: monthlyData, backgroundColor: ctx => { const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 280); g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2'); return g; }, borderRadius: 8, borderSkipped: false, maxBarThickness: 44 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#edf2f7' }, ticks: { color: '#718096', font: { size: 11 } } }, x: { grid: { display: false }, ticks: { color: '#718096', font: { size: 11, weight: '600' } } } } }
+            });
+        }
+
+        // ===================== MATERIALS =====================
+        function renderMaterialsTable(searchTerm = '') {
+            const tbody = document.getElementById('materialsTableBody');
+            let filtered = materials;
+            if (searchTerm) filtered = materials.filter(m => m.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 40px; color: #999;">No materials found</td></tr>`; return; }
+            tbody.innerHTML = filtered.map(m => `
+                <tr>
+                    <td>${m.id}</td>
+                    <td><strong>${escapeHtml(m.name)}</strong></td>
+                    <td>${m.quantity.toFixed(2)}</td>
+                    <td>${escapeHtml(m.unit)}</td>
+                    <td>${m.reorderLevel.toFixed(2)}</td>
+                    <td><span class="badge ${m.quantity <= m.reorderLevel ? 'badge-danger' : 'badge-success'}">${m.quantity <= m.reorderLevel ? 'Reorder Needed' : 'In Stock'}</span></td>
+                    <td class="admin-only">
+                        <button class="btn btn-primary btn-sm" onclick="editMaterial(${m.id})">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteMaterial(${m.id})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+            document.querySelectorAll('.admin-only').forEach(el => { el.style.display = isAdmin ? '' : 'none'; });
+        }
+        function searchMaterials() { renderMaterialsTable(document.getElementById('searchMaterials').value); }
+        function showAddMaterial() {
+            if (isViewer) { showToast('⛔ Viewers cannot add materials', 'error'); return; }
+            document.getElementById('modalTitle').textContent = 'Add New Material';
+            document.getElementById('editId').value = '';
+            document.getElementById('modalForm').reset();
+            document.getElementById('modal').classList.add('active');
+        }
+        function editMaterial(id) {
+            if (isViewer) { showToast('⛔ Viewers cannot edit', 'error'); return; }
+            const m = materials.find(m => m.id === id); if (!m) return;
+            document.getElementById('modalTitle').textContent = 'Edit Material';
+            document.getElementById('editId').value = id;
+            document.getElementById('modalName').value = m.name;
+            document.getElementById('modalQuantity').value = m.quantity;
+            document.getElementById('modalUnit').value = m.unit;
+            document.getElementById('modalReorder').value = m.reorderLevel;
+            document.getElementById('modalMinStock').value = m.minStock || 0;
+            document.getElementById('modalMaxStock').value = m.maxStock || 0;
+            document.getElementById('modal').classList.add('active');
+        }
+        function handleModalSubmit(e) {
+            e.preventDefault();
+            if (isViewer) { showToast('⛔ Viewers cannot save', 'error'); return; }
+            const id = parseInt(document.getElementById('editId').value);
+            const name = document.getElementById('modalName').value.trim();
+            const quantity = parseFloat(document.getElementById('modalQuantity').value);
+            const unit = document.getElementById('modalUnit').value.trim();
+            const reorderLevel = parseFloat(document.getElementById('modalReorder').value);
+            const minStock = parseFloat(document.getElementById('modalMinStock').value) || 0;
+            const maxStock = parseFloat(document.getElementById('modalMaxStock').value) || 0;
+            if (!name || isNaN(quantity) || !unit || isNaN(reorderLevel)) { showToast('Please fill all required fields', 'error'); return; }
+            if (id) {
+                const i = materials.findIndex(m => m.id === id);
+                if (i !== -1) { materials[i] = { ...materials[i], name, quantity, unit, reorderLevel, minStock, maxStock }; showToast('Material updated', 'success'); }
+            } else {
+                materials.push({ id: Date.now(), name, quantity, unit, reorderLevel, minStock, maxStock });
+                showToast('Material added', 'success');
+            }
+            saveToLocalStorage(); renderMaterialsTable(); updateMaterialSelects(); updateDashboard(); closeModal();
+        }
+        function deleteMaterial(id) {
+            if (isViewer) { showToast('⛔ Viewers cannot delete', 'error'); return; }
+            const m = materials.find(m => m.id === id); if (!m) return;
+            const password = prompt('Enter delete password:');
+            if (password !== settings.deletePassword) { showToast('Incorrect password', 'error'); return; }
+            if (confirm(`Delete "${m.name}"?`)) {
+                materials = materials.filter(m => m.id !== id);
+                saveToLocalStorage(); renderMaterialsTable(); updateMaterialSelects(); updateDashboard();
+                showToast('Deleted', 'success');
+            }
+        }
+
+        // ===================== RECEIPT =====================
+        function handleReceipt(e) {
+            e.preventDefault();
+            if (isViewer) { showToast('⛔ Viewers cannot add receipts', 'error'); return; }
+            const materialName = document.getElementById('receiptMaterial').value;
+            const vendorName = document.getElementById('vendorName').value.trim();
+            const quantity = parseFloat(document.getElementById('receiptQuantity').value);
+            const receiptDate = document.getElementById('receiptDate').value;
+            const receiptTime = document.getElementById('receiptTime').value;
+            const receivedBy = document.getElementById('receivedBy').value.trim();
+            const invoiceNumber = document.getElementById('invoiceNumber').value.trim();
+            if (!materialName || !vendorName || isNaN(quantity) || !receivedBy) { showToast('Fill required fields', 'error'); return; }
+            const material = materials.find(m => m.name === materialName);
+            if (material) material.quantity += quantity;
+            receipts.push({ id: Date.now(), materialName, vendorName, quantity, date: receiptDate, time: receiptTime, receivedBy, invoiceNumber });
+            saveToLocalStorage(); renderReceiptsTable(); updateMaterialSelects(); updateDashboard();
+            document.getElementById('receiptForm').reset(); setCurrentDateTime();
+            showToast('Receipt saved', 'success');
+        }
+        function renderReceiptsTable(searchTerm = '', filterDate = '') {
+            const tbody = document.getElementById('receiptsTableBody');
+            let filtered = receipts;
+            if (searchTerm) filtered = filtered.filter(r => r.materialName.toLowerCase().includes(searchTerm.toLowerCase()) || r.vendorName.toLowerCase().includes(searchTerm.toLowerCase()));
+            if (filterDate) filtered = filtered.filter(r => r.date === filterDate);
+            if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#999;">No receipts found</td></tr>`; return; }
+            tbody.innerHTML = filtered.slice().reverse().map(r => `
+                <tr>
+                    <td>${r.date}</td><td>${r.time}</td><td><strong>${escapeHtml(r.materialName)}</strong></td>
+                    <td>${escapeHtml(r.vendorName)}</td><td>${r.quantity.toFixed(2)}</td><td>${escapeHtml(r.receivedBy)}</td>
+                    <td class="admin-only"><button class="btn btn-danger btn-sm" onclick="reverseReceipt(${r.id})">🔄</button></td>
+                </tr>
+            `).join('');
+            document.querySelectorAll('.admin-only').forEach(el => { el.style.display = isAdmin ? '' : 'none'; });
+        }
+        function searchReceipts() { renderReceiptsTable(document.getElementById('searchReceipts').value, document.getElementById('receiptFilterDate').value); }
+        function reverseReceipt(id) {
+            if (isViewer) { showToast('⛔ Viewers cannot reverse', 'error'); return; }
+            const receipt = receipts.find(r => r.id === id); if (!receipt) return;
+            const pwd = prompt('Enter Admin Reversal Password:');
+            if (pwd !== settings.reversalPassword) { showToast('Incorrect reversal password', 'error'); return; }
+            if (!confirm(`Reverse receipt for ${receipt.materialName} (Qty: ${receipt.quantity})?`)) return;
+            const material = materials.find(m => m.name === receipt.materialName);
+            if (!material) { showToast('Material not found', 'error'); return; }
+            if (material.quantity < receipt.quantity) { showToast(`Cannot reverse: qty would go negative. Current: ${material.quantity.toFixed(2)}`, 'error'); return; }
+            material.quantity -= receipt.quantity;
+            receipts = receipts.filter(r => r.id !== id);
+            saveToLocalStorage(); renderReceiptsTable(); updateMaterialSelects(); updateDashboard();
+            showToast('Receipt reversed', 'success');
+        }
+
+        // ===================== ISSUE =====================
+        function handleIssue(e) {
+            e.preventDefault();
+            if (isViewer) { showToast('⛔ Viewers cannot issue materials', 'error'); return; }
+            const materialName = document.getElementById('issueMaterial').value;
+            const quantity = parseFloat(document.getElementById('issueQuantity').value);
+            const issuedTo = document.getElementById('issuedTo').value.trim();
+            const issuedBy = document.getElementById('issuedBy').value.trim();
+            const challanNo = document.getElementById('challanNo').value.trim();
+            const issueDate = document.getElementById('issueDate').value;
+            const remarks = document.getElementById('issueRemarks').value.trim();
+            if (!materialName || isNaN(quantity) || !issuedTo || !issuedBy) { showToast('Fill required fields', 'error'); return; }
+            const material = materials.find(m => m.name === materialName);
+            if (!material) { showToast('Material not found', 'error'); return; }
+            if (material.quantity < quantity) { showToast(`Insufficient quantity. Available: ${material.quantity.toFixed(2)}`, 'error'); return; }
+            material.quantity -= quantity;
+            if (materialName === 'Old/Rejected SC Valve Stock') {
+                const target = materials.find(m => m.name === 'Rejected SC Valve issued Stock');
+                if (target) { target.quantity += quantity; }
+                else { materials.push({ id: Date.now(), name: 'Rejected SC Valve issued Stock', quantity, unit: material.unit, reorderLevel: 0, minStock: 0, maxStock: 0 }); }
+            }
+            issues.push({ id: Date.now(), materialName, quantity, issuedTo, issuedBy, challanNo, date: issueDate, remarks });
+            saveToLocalStorage(); renderIssuesTable(); updateMaterialSelects(); updateDashboard();
+            document.getElementById('issueForm').reset(); setCurrentDateTime();
+            showToast('Material issued', 'success');
+        }
+        function renderIssuesTable(searchTerm = '', filterDate = '') {
+            const tbody = document.getElementById('issuesTableBody');
+            let filtered = issues;
+            if (searchTerm) filtered = filtered.filter(i => i.materialName.toLowerCase().includes(searchTerm.toLowerCase()) || i.issuedTo.toLowerCase().includes(searchTerm.toLowerCase()) || i.issuedBy.toLowerCase().includes(searchTerm.toLowerCase()));
+            if (filterDate) filtered = filtered.filter(i => i.date === filterDate);
+            if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#999;">No issues found</td></tr>`; return; }
+            tbody.innerHTML = filtered.slice().reverse().map(i => `
+                <tr>
+                    <td>${i.date}</td><td><strong>${escapeHtml(i.materialName)}</strong></td><td>${i.quantity.toFixed(2)}</td>
+                    <td>${escapeHtml(i.issuedTo)}</td><td>${escapeHtml(i.issuedBy)}</td><td>${escapeHtml(i.challanNo || '-')}</td>
+                    <td class="admin-only"><button class="btn btn-danger btn-sm" onclick="reverseIssue(${i.id})">🔄</button></td>
+                </tr>
+            `).join('');
+            document.querySelectorAll('.admin-only').forEach(el => { el.style.display = isAdmin ? '' : 'none'; });
+        }
+        function searchIssues() { renderIssuesTable(document.getElementById('searchIssues').value, document.getElementById('issueFilterDate').value); }
+        function reverseIssue(id) {
+            if (isViewer) { showToast('⛔ Viewers cannot reverse', 'error'); return; }
+            const issue = issues.find(i => i.id === id); if (!issue) return;
+            const pwd = prompt('Enter Admin Reversal Password:');
+            if (pwd !== settings.reversalPassword) { showToast('Incorrect reversal password', 'error'); return; }
+            if (!confirm(`Reverse issue for ${issue.materialName} (Qty: ${issue.quantity})?`)) return;
+            const material = materials.find(m => m.name === issue.materialName);
+            if (!material) { showToast('Material not found', 'error'); return; }
+            if (issue.materialName === 'Old/Rejected SC Valve Stock') {
+                const target = materials.find(m => m.name === 'Rejected SC Valve issued Stock');
+                if (target) {
+                    if (target.quantity < issue.quantity) { showToast(`Cannot reverse: target qty would go negative. Target: ${target.quantity.toFixed(2)}`, 'error'); return; }
+                    target.quantity -= issue.quantity;
+                } else { showToast('Target "Rejected SC Valve issued Stock" not found.', 'error'); return; }
+            }
+            material.quantity += issue.quantity;
+            issues = issues.filter(i => i.id !== id);
+            saveToLocalStorage(); renderIssuesTable(); updateMaterialSelects(); updateDashboard();
+            showToast('Issue reversed', 'success');
+        }
+
+        // ===================== MANUAL =====================
+        function manualConsume() {
+            if (isViewer) { showToast('⛔ Viewers cannot consume', 'error'); return; }
+            const name = document.getElementById('manualMaterial').value;
+            const qty = parseFloat(document.getElementById('manualQuantity').value);
+            if (!name || isNaN(qty) || qty <= 0) { showToast('Select material and valid quantity', 'error'); return; }
+            const material = materials.find(m => m.name === name);
+            if (!material) { showToast('Material not found', 'error'); return; }
+            if (material.quantity < qty) { showToast(`Insufficient quantity. Available: ${material.quantity.toFixed(2)}`, 'error'); return; }
+            material.quantity -= qty;
+            const dateStr = new Date().toISOString().split('T')[0];
+            issues.push({ id: Date.now(), materialName: name, quantity: qty, issuedTo: 'Manual Consumption', issuedBy: 'System', challanNo: 'MANUAL', date: dateStr, remarks: 'Manual adjustment' });
+            saveToLocalStorage(); renderIssuesTable(); updateMaterialSelects(); updateDashboard();
+            document.getElementById('manualQuantity').value = '';
+            showToast(`Consumed ${qty} of ${name}`, 'success');
+        }
+        function updateManualSelect() {
+            const sel = document.getElementById('manualMaterial'); if (!sel) return;
+            const current = sel.value;
+            sel.innerHTML = '<option value="">Select</option>';
+            materials.forEach(m => { const o = document.createElement('option'); o.value = m.name; o.textContent = `${m.name} (${m.quantity.toFixed(2)} ${m.unit})`; sel.appendChild(o); });
+            if (current) sel.value = current;
+        }
+        function updateMaterialSelects() {
+            ['receiptMaterial', 'issueMaterial'].forEach(id => {
+                const sel = document.getElementById(id); if (!sel) return;
+                const current = sel.value;
+                sel.innerHTML = '<option value="">Select Material</option>';
+                materials.forEach(m => { const o = document.createElement('option'); o.value = m.name; o.textContent = `${m.name} (${m.quantity.toFixed(2)} ${m.unit})`; sel.appendChild(o); });
+                if (current) sel.value = current;
+            });
+            updateManualSelect();
+        }
+
+        // ===================== USERS =====================
+        function renderUsersGrid() {
+            const grid = document.getElementById('usersGrid'); if (!grid) return;
+            if (users.length === 0) { grid.innerHTML = '<p style="color:#999;">No users yet</p>'; return; }
+            grid.innerHTML = users.map((u, idx) => `
+                <div class="user-card">
+                    <div class="u-info">
+                        <div class="u-name">${escapeHtml(u.username)}</div>
+                        <div class="u-role ${u.role}">${u.role === 'admin' ? '🔧 Administrator' : '👁️ Viewer'}</div>
+                    </div>
+                    ${u.username === 'admin' && idx === 0 ? '' : `<button class="btn btn-danger btn-sm" onclick="deleteUser('${escapeJs(u.username)}')">Remove</button>`}
+                </div>
+            `).join('');
+        }
+        function addUser() {
+            if (!isAdmin) return;
+            const u = document.getElementById('newUsername').value.trim();
+            const p = document.getElementById('newUserPassword').value;
+            const r = document.getElementById('newUserRole').value;
+            if (!u || !p) { showToast('Enter username and password', 'error'); return; }
+            if (u.length < 3) { showToast('Username must be 3+ chars', 'error'); return; }
+            if (p.length < 4) { showToast('Password must be 4+ chars', 'error'); return; }
+            if (users.find(x => x.username.toLowerCase() === u.toLowerCase())) { showToast('Username already exists', 'error'); return; }
+            users.push({ username: u, password: p, role: r, createdAt: Date.now() });
+            saveToLocalStorage();
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newUserPassword').value = '';
+            renderUsersGrid();
+            showToast(`User "${u}" added as ${r}`, 'success');
+        }
+        function deleteUser(username) {
+            if (!isAdmin) return;
+            if (username === 'admin') { showToast('Cannot delete primary admin', 'error'); return; }
+            if (!confirm(`Remove user "${username}"?`)) return;
+            users = users.filter(u => u.username !== username);
+            // Also remove their remembered devices
+            rememberedDevices = rememberedDevices.filter(d => d.username !== username);
+            saveToLocalStorage();
+            renderUsersGrid();
+            renderRememberedDevices();
+            showToast('User removed', 'success');
+        }
+
+        // ===================== REMEMBERED DEVICES =====================
+        function renderRememberedDevices() {
+            const list = document.getElementById('devicesList'); if (!list) return;
+            if (rememberedDevices.length === 0) {
+                list.innerHTML = '<div class="no-devices">No devices have been remembered yet.</div>';
+                return;
+            }
+            list.innerHTML = rememberedDevices.map((d, idx) => `
+                <div class="device-card">
+                    <div class="d-info">
+                        <div class="d-user">
+                            ${escapeHtml(d.username)}
+                            <span class="d-badge">${d.role === 'admin' ? 'Admin' : 'Viewer'}</span>
+                        </div>
+                        <div class="d-meta" title="${escapeHtml(d.deviceLabel || '')}">
+                            ${escapeHtml(d.deviceLabel || 'Unknown device')} • ${new Date(d.rememberedAt).toLocaleString()}
+                        </div>
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="clearRememberedDevice(${idx})">Remove</button>
+                </div>
+            `).join('');
+        }
+        function clearRememberedDevice(idx) {
+            if (!isAdmin) return;
+            if (!confirm(`Remove device access for "${rememberedDevices[idx].username}"?`)) return;
+            rememberedDevices.splice(idx, 1);
+            saveToLocalStorage();
+            renderRememberedDevices();
+            showToast('Device access removed', 'success');
+        }
+        function clearAllRememberedDevices() {
+            if (!isAdmin) return;
+            if (rememberedDevices.length === 0) { showToast('No devices to clear', 'info'); return; }
+            if (!confirm(`Clear all ${rememberedDevices.length} remembered device(s)?\n\nUsers on those devices will be asked for the store key again.`)) return;
+            rememberedDevices = [];
+            saveToLocalStorage();
+            renderRememberedDevices();
+            showToast('All remembered devices cleared', 'success');
+        }
+
+        // ===================== STORE KEY =====================
+        function updateStoreKey() {
+            if (!isAdmin) return;
+            const k = document.getElementById('newStoreKey').value.trim();
+            if (k.length < 6) { showToast('Store key must be 6+ characters', 'error'); return; }
+            settings.storeKey = k;
+            saveToLocalStorage();
+            document.getElementById('currentStoreKeyDisplay').textContent = k;
+            document.getElementById('newStoreKey').value = '';
+
+            // Warn if remembered devices exist
+            if (rememberedDevices.length > 0) {
+                if (confirm(`Store key changed.\n\nThere are ${rememberedDevices.length} remembered device(s).\n\nClear them so users are forced to enter the NEW key?`)) {
+                    rememberedDevices = [];
+                    saveToLocalStorage();
+                    renderRememberedDevices();
+                }
+            }
+            showToast('Store key updated', 'success');
+        }
+
+        // ===================== EXPORT =====================
+        function exportData(section) {
+            let data = [], filename = '';
+            if (section === 'management') { data = materials; filename = 'materials_data'; }
+            else if (section === 'receipt') { data = receipts; filename = 'receipts_data'; }
+            else if (section === 'issue') { data = issues; filename = 'issues_data'; }
+            if (!data.length) { showToast('No data', 'error'); return; }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `${filename}_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            showToast('Exported', 'success');
+        }
+        function generateReport(type) {
+            const data = type === 'receipt' ? receipts : issues;
+            if (!data.length) { showToast('No data', 'error'); return; }
+            const win = window.open('', '_blank');
+            win.document.write('<html><head><title>Report</title><style>table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ddd;padding:8px;}th{background:#f2f2f2;}</style></head><body>');
+            win.document.write(`<h2>${type.toUpperCase()} Report</h2><table>`);
+            const headers = type === 'receipt' ? ['Date','Time','Material','Vendor','Quantity','Received By'] : ['Date','Material','Quantity','Issued To','Issued By','Challan No'];
+            win.document.write('<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>');
+            data.forEach(r => {
+                const row = type === 'receipt' ? [r.date, r.time, r.materialName, r.vendorName, r.quantity, r.receivedBy] : [r.date, r.materialName, r.quantity, r.issuedTo, r.issuedBy, r.challanNo || '-'];
+                win.document.write('<tr>' + row.map(c => `<td>${c}</td>`).join('') + '</tr>');
+            });
+            win.document.write('</table></body></html>');
+            win.document.close(); win.print();
+        }
+        function exportExcel(type) {
+            const data = type === 'receipt' ? receipts : issues;
+            if (!data.length) { showToast('No data', 'error'); return; }
+            let rows;
+            if (type === 'receipt') rows = data.map(r => ({ Date: r.date, Time: r.time, Material: r.materialName, Vendor: r.vendorName, Quantity: r.quantity, 'Received By': r.receivedBy }));
+            else rows = data.map(i => ({ Date: i.date, Material: i.materialName, Quantity: i.quantity, 'Issued To': i.issuedTo, 'Issued By': i.issuedBy, 'Challan No': i.challanNo || '' }));
+            const ws = XLSX.utils.json_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, type === 'receipt' ? 'Receipts' : 'Issues');
+            XLSX.writeFile(wb, `${type}_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showToast('Excel exported', 'success');
+        }
+
+        // ===================== PASSWORDS =====================
+        function updateSettingsPassword() {
+            if (!isAdmin) return;
+            const p = document.getElementById('settingsPassword').value;
+            if (p.length < 4) { showToast('Min 4 chars', 'error'); return; }
+            settings.settingsPassword = p; saveToLocalStorage();
+            showToast('Settings password updated', 'success');
+        }
+        function updateReversalPassword() {
+            if (!isAdmin) return;
+            const p = document.getElementById('reversalPassword').value;
+            if (p.length < 4) { showToast('Min 4 chars', 'error'); return; }
+            settings.reversalPassword = p; saveToLocalStorage();
+            showToast('Reversal password updated', 'success');
+        }
+        function updateDeletePassword() {
+            if (!isAdmin) return;
+            const p = document.getElementById('deletePassword').value;
+            if (p.length < 6) { showToast('Min 6 chars', 'error'); return; }
+            settings.deletePassword = p; saveToLocalStorage();
+            showToast('Delete password updated', 'success');
+        }
+
+        // ===================== DATA MGMT =====================
+        function saveData() { if (isViewer) { showToast('⛔ Viewers cannot save', 'error'); return; } saveToLocalStorage(); showToast('Data saved', 'success'); }
+        function clearAllData() {
+            if (!isAdmin) return;
+            const pwd = prompt('Enter delete password:');
+            if (pwd !== settings.deletePassword) { showToast('Incorrect password', 'error'); return; }
+            if (confirm('Clear ALL data? This includes remembered devices.')) { materials = []; receipts = []; issues = []; rememberedDevices = []; saveToLocalStorage(); loadAllData(); renderRememberedDevices(); showToast('Cleared', 'info'); }
+        }
+        function uploadData() {
+            if (isViewer) { showToast('⛔ Viewers cannot upload', 'error'); return; }
+            const fileInput = document.getElementById('uploadFile');
+            const file = fileInput.files[0];
+            if (!file) { showToast('Please select a file to upload', 'error'); return; }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const buffer = e.target.result;
+                    const bytes = new Uint8Array(buffer);
+                    const isZip = bytes.length > 1 && bytes[0] === 0x50 && bytes[1] === 0x4B;
+                    const fname = file.name.toLowerCase();
+                    if (isZip || fname.endsWith('.xlsx') || fname.endsWith('.xls')) {
+                        if (typeof XLSX === 'undefined') { showToast('Excel parser not loaded', 'error'); return; }
+                        const wb = XLSX.read(buffer, { type: 'array' });
+                        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+                        importExcelRows(rows);
+                    } else {
+                        let text = new TextDecoder('utf-8').decode(buffer);
+                        if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+                        const trimmed = text.trimStart();
+                        if (trimmed.startsWith('{') || trimmed.startsWith('[')) importJSONData(JSON.parse(text));
+                        else parseCSVAndImport(text);
+                    }
+                } catch (err) { showToast('Upload failed: ' + err.message, 'error'); }
+                finally { fileInput.value = ''; }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        function importJSONData(data) {
+            let imported = false;
+            if (data && typeof data === 'object' && !Array.isArray(data)) {
+                if (Array.isArray(data.materials)) { materials = data.materials; imported = true; }
+                if (Array.isArray(data.receipts)) { receipts = data.receipts; imported = true; }
+                if (Array.isArray(data.issues)) { issues = data.issues; imported = true; }
+                if (data.settings) { settings = { ...settings, ...data.settings }; imported = true; }
+                if (Array.isArray(data.users)) { users = data.users; imported = true; }
+                if (Array.isArray(data.rememberedDevices)) { rememberedDevices = data.rememberedDevices; imported = true; }
+            } else if (Array.isArray(data)) {
+                if (data.length === 0) { showToast('Empty array — nothing to import', 'error'); return; }
+                const f = data[0] || {};
+                if (f.name !== undefined && f.quantity !== undefined && f.unit !== undefined) { materials = data; imported = true; }
+                else if (f.materialName !== undefined && f.vendorName !== undefined) { receipts = data; imported = true; }
+                else if (f.materialName !== undefined && f.issuedTo !== undefined) { issues = data; imported = true; }
+                else { showToast('Could not detect data type from JSON array', 'error'); return; }
+            }
+            if (!imported) { showToast('No valid data found in file', 'error'); return; }
+            if (!settings.settingsPassword) settings.settingsPassword = 'admin123';
+            if (!settings.reversalPassword) settings.reversalPassword = 'admin123';
+            if (!settings.deletePassword) settings.deletePassword = 'admin123';
+            if (!settings.storeKey) settings.storeKey = 'STORE2024';
+            saveToLocalStorage(); loadAllData();
+            if (isAdmin) renderRememberedDevices();
+            showToast('Data uploaded successfully', 'success');
+        }
+        function importExcelRows(rows) {
+            if (!rows || rows.length === 0) { showToast('The Excel sheet is empty', 'error'); return; }
+            const imported = rows.map((row, idx) => {
+                const r = {}; Object.keys(row).forEach(k => { r[String(k).trim().toLowerCase()] = row[k]; });
+                const name = r['spare name'] || r['name'] || r['material'] || r['material name'] || r['item'] || '';
+                if (!String(name).trim()) return null;
+                return {
+                    id: Date.now() + idx, name: String(name).trim(),
+                    quantity: parseFloat(r['available'] || r['quantity'] || r['qty'] || 0) || 0,
+                    unit: String(r['unit'] || 'pcs').trim() || 'pcs',
+                    reorderLevel: parseFloat(r['reorder level'] || r['reorder'] || r['min stock'] || 0) || 0,
+                    minStock: 0, maxStock: 0,
+                    category: r['category'] || r['machine/unit'] || '-',
+                    maker: r['maker'] || '', specifications: r['specifications'] || '',
+                    shelfNo: r['shelf no'] || '', rackNo: r['rack no'] || ''
+                };
+            }).filter(Boolean);
+            if (imported.length === 0) { showToast('No valid rows found', 'error'); return; }
+            materials = imported;
+            saveToLocalStorage(); loadAllData();
+            showToast(`Imported ${imported.length} materials`, 'success');
+        }
+        function parseCSVAndImport(csvText) {
+            const lines = csvText.trim().split(/\r?\n/).filter(l => l.length > 0);
+            if (lines.length < 2) { showToast('CSV empty', 'error'); return; }
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            const rows = lines.slice(1).map(l => l.split(',').map(c => c.trim().replace(/^"|"$/g, '')));
+            if (headers.includes('Vendor')) {
+                receipts = rows.map(r => ({ id: Date.now() + Math.random(), date: r[0], time: r[1], materialName: r[2], vendorName: r[3], quantity: parseFloat(r[4]) || 0, receivedBy: r[5] })).filter(r => r.materialName);
+                receipts.forEach(r => { const m = materials.find(x => x.name === r.materialName); if (m) m.quantity += r.quantity; });
+                showToast(`Imported ${receipts.length} receipts`, 'success');
+            } else if (headers.includes('Issued To')) {
+                issues = rows.map(r => ({ id: Date.now() + Math.random(), date: r[0], materialName: r[1], quantity: parseFloat(r[2]) || 0, issuedTo: r[3], issuedBy: r[4], challanNo: r[5] || '' })).filter(i => i.materialName);
+                issues.forEach(i => { const m = materials.find(x => x.name === i.materialName); if (m) m.quantity -= i.quantity; });
+                showToast(`Imported ${issues.length} issues`, 'success');
+            } else { showToast('Unrecognized CSV format', 'error'); return; }
+            saveToLocalStorage(); loadAllData();
+        }
+        function exportAllData() {
+            const all = { materials, receipts, issues, settings, users, rememberedDevices, exportedAt: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(all, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `all_data_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            showToast('All data exported', 'success');
+        }
+
+        // ===================== EXCEL SYNC =====================
+        function setupExcelSyncUI() {
+            document.querySelectorAll('.sync-option').forEach(opt => {
+                opt.addEventListener('click', function() {
+                    document.querySelectorAll('.sync-option').forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const radio = this.querySelector('input[type="radio"]');
+                    if (radio) radio.checked = true;
+                    pendingSync.mode = radio ? radio.value : 'merge';
+                    if (pendingSync.preview) previewExcelSync();
+                });
+            });
+        }
+        function readExcelFile(callback) {
+            const fileInput = document.getElementById('excelSyncFile');
+            const file = fileInput.files[0];
+            if (!file) { showToast('Please choose an Excel file first', 'error'); return; }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const buffer = e.target.result;
+                    const bytes = new Uint8Array(buffer);
+                    const isZip = bytes.length > 1 && bytes[0] === 0x50 && bytes[1] === 0x4B;
+                    const fname = file.name.toLowerCase();
+                    if (isZip || fname.endsWith('.xlsx') || fname.endsWith('.xls')) {
+                        if (typeof XLSX === 'undefined') { showToast('Excel parser not loaded', 'error'); return; }
+                        const wb = XLSX.read(buffer, { type: 'array' });
+                        const sheetRows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+                        callback(sheetRows);
+                    } else if (fname.endsWith('.csv')) {
+                        let text = new TextDecoder('utf-8').decode(buffer);
+                        if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+                        callback(parseCSVToRows(text));
+                    } else { showToast('Please upload .xlsx, .xls or .csv file', 'error'); }
+                } catch (err) { showToast('Read failed: ' + err.message, 'error'); }
+            };
+            reader.onerror = function() { showToast('Failed to read the file', 'error'); };
+            reader.readAsArrayBuffer(file);
+        }
+        function parseCSVToRows(csvText) {
+            const lines = csvText.trim().split(/\r?\n/);
+            if (lines.length === 0) return [];
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+            const out = [];
+            for (let i = 1; i < lines.length; i++) {
+                const cells = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+                const row = {};
+                headers.forEach((h, idx) => { row[h] = cells[idx] !== undefined ? cells[idx] : ''; });
+                out.push(row);
+            }
+            return out;
+        }
+        function normalizeExcelRow(row, idx) {
+            const r = {};
+            Object.keys(row).forEach(k => { r[String(k).trim().toLowerCase()] = row[k]; });
+            const name = r['spare name'] || r['name'] || r['material'] || r['material name'] || r['item'] || '';
+            if (!String(name).trim()) return null;
+            return {
+                id: Date.now() + idx, name: String(name).trim(),
+                quantity: parseFloat(r['available'] || r['quantity'] || r['qty'] || 0) || 0,
+                unit: String(r['unit'] || 'pcs').trim() || 'pcs',
+                reorderLevel: parseFloat(r['reorder level'] || r['reorder'] || r['min stock'] || 0) || 0,
+                minStock: 0, maxStock: 0,
+                category: r['category'] || r['machine/unit'] || '-',
+                maker: r['maker'] || '', specifications: r['specifications'] || '',
+                shelfNo: r['shelf no'] || '', rackNo: r['rack no'] || ''
+            };
+        }
+        function previewExcelSync() {
+            if (!isAdmin) return;
+            readExcelFile(function(rawRows) {
+                const parsed = rawRows.map(normalizeExcelRow).filter(Boolean);
+                if (parsed.length === 0) { showToast('No valid rows found — check "Spare Name" column', 'error'); return; }
+                pendingSync.parsedRows = parsed;
+                pendingSync.mode = document.querySelector('input[name="syncMode"]:checked').value;
+                const existingByName = {};
+                materials.forEach(m => { existingByName[m.name.toLowerCase()] = m; });
+                const preview = [];
+                let addCount = 0, updateCount = 0, sameCount = 0, skipExisting = 0;
+                parsed.forEach(row => {
+                    const key = row.name.toLowerCase();
+                    const existing = existingByName[key];
+                    if (!existing) { preview.push({ name: row.name, currentQty: '—', newQty: row.quantity, change: 'NEW', kind: 'add' }); addCount++; }
+                    else if (pendingSync.mode === 'addonly') { preview.push({ name: row.name, currentQty: existing.quantity.toFixed(2), newQty: existing.quantity.toFixed(2), change: 'SKIP', kind: 'same' }); skipExisting++; }
+                    else {
+                        const diff = row.quantity - existing.quantity;
+                        if (Math.abs(diff) < 0.0001 && row.reorderLevel === existing.reorderLevel) { preview.push({ name: row.name, currentQty: existing.quantity.toFixed(2), newQty: row.quantity.toFixed(2), change: 'No change', kind: 'same' }); sameCount++; }
+                        else { const sign = diff > 0 ? '+' : ''; preview.push({ name: row.name, currentQty: existing.quantity.toFixed(2), newQty: row.quantity.toFixed(2), change: `${sign}${diff.toFixed(2)}`, kind: 'update' }); updateCount++; }
+                    }
+                });
+                pendingSync.preview = preview;
+                document.getElementById('syncPreviewBody').innerHTML = preview.map(p => `
+                    <tr><td>${escapeHtml(p.name)}</td><td>${p.currentQty}</td><td>${p.newQty}</td>
+                    <td class="${p.kind === 'add' ? 'diff-add' : p.kind === 'update' ? 'diff-update' : 'diff-same'}">${p.change}</td></tr>
+                `).join('');
+                const modeText = pendingSync.mode === 'merge' ? 'Merge &amp; Update' : pendingSync.mode === 'replace' ? 'Replace All' : 'Add Only';
+                document.getElementById('syncSummary').innerHTML = `
+                    <b>Mode:</b> ${modeText} | <b>Will add:</b> <span style="color:#22543d;">${addCount}</span>
+                    | <b>Will update:</b> <span style="color:#7b341e;">${updateCount}</span>
+                    | <b>No change:</b> ${sameCount}
+                    ${skipExisting ? ` | <b>Skipped:</b> ${skipExisting}` : ''}
+                `;
+                document.getElementById('syncPreviewContainer').style.display = 'block';
+                const btn = document.getElementById('applySyncBtn');
+                btn.disabled = false; btn.style.opacity = '1';
+                showToast('Preview ready — review then click Apply Sync', 'info');
+            });
+        }
+        function applyExcelSync() {
+            if (!isAdmin) return;
+            if (!pendingSync.parsedRows) { showToast('Please preview first', 'error'); return; }
+            const mode = pendingSync.mode;
+            const parsed = pendingSync.parsedRows;
+            if (mode === 'replace' && !confirm(`⚠️ REPLACE all ${materials.length} materials with ${parsed.length} from Excel?`)) return;
+            let addCount = 0, updateCount = 0, skipCount = 0;
+            if (mode === 'replace') { materials = parsed.map(p => ({ ...p })); addCount = parsed.length; }
+            else {
+                const existingByName = {};
+                materials.forEach(m => { existingByName[m.name.toLowerCase()] = m; });
+                parsed.forEach(row => {
+                    const existing = existingByName[row.name.toLowerCase()];
+                    if (!existing) { materials.push({ ...row }); addCount++; }
+                    else if (mode === 'merge') {
+                        existing.quantity = row.quantity;
+                        existing.reorderLevel = row.reorderLevel;
+                        if (row.unit) existing.unit = row.unit;
+                        if (row.category) existing.category = row.category;
+                        if (row.maker) existing.maker = row.maker;
+                        if (row.specifications) existing.specifications = row.specifications;
+                        if (row.shelfNo) existing.shelfNo = row.shelfNo;
+                        if (row.rackNo) existing.rackNo = row.rackNo;
+                        updateCount++;
+                    } else skipCount++;
+                });
+            }
+            saveToLocalStorage(); loadAllData();
+            pendingSync = { parsedRows: null, mode: 'merge', preview: null };
+            document.getElementById('syncPreviewContainer').style.display = 'none';
+            document.getElementById('excelSyncFile').value = '';
+            const btn = document.getElementById('applySyncBtn');
+            btn.disabled = true; btn.style.opacity = '0.5';
+            let msg = `Sync complete — Added: ${addCount}, Updated: ${updateCount}`;
+            if (skipCount) msg += `, Skipped: ${skipCount}`;
+            showToast(msg, 'success');
+        }
+        function cancelExcelSync() {
+            pendingSync = { parsedRows: null, mode: 'merge', preview: null };
+            document.getElementById('syncPreviewContainer').style.display = 'none';
+            document.getElementById('excelSyncFile').value = '';
+            const btn = document.getElementById('applySyncBtn');
+            btn.disabled = true; btn.style.opacity = '0.5';
+            showToast('Sync cancelled', 'info');
+        }
+
+        // ===================== CLOUD SYNC =====================
+        function updateCloudStatus(state, text) {
+            const el = document.getElementById('cloudStatus');
+            const txt = document.getElementById('cloudStatusText');
+            if (!el || !txt) return;
+            el.className = 'cloud-status ' + state;
+            txt.textContent = text;
+            if (lastSyncedAt) document.getElementById('cloudLastSync').textContent = 'Last sync: ' + lastSyncedAt.toLocaleString();
+        }
+
+        function cloudTestConnection() {
+            if (!firebaseDb) {
+                updateCloudStatus('error', 'Firebase not initialized');
+                showToast('❌ Firebase not initialized — check databaseURL', 'error');
+                return;
+            }
+            updateCloudStatus('syncing', 'Connecting…');
+            firebaseDb.ref('.info/connected').once('value')
+                .then(snap => {
+                    if (snap.val()) { updateCloudStatus('connected', 'Connected to Firebase'); showToast('✅ Cloud connection OK', 'success'); }
+                    else { updateCloudStatus('offline', 'Offline'); showToast('Cannot reach Firebase', 'error'); }
+                })
+                .catch(err => { updateCloudStatus('error', 'Connection error'); showToast('Connection failed: ' + err.message, 'error'); });
+        }
+
+        function cloudPushAll(silent = false) {
+            if (!isAdmin) { if (!silent) showToast('⛔ Only admins can push to cloud', 'error'); return; }
+            if (!firebaseDb) { showToast('Firebase not initialized', 'error'); return; }
+            if (!silent) updateCloudStatus('syncing', 'Uploading…');
+            const payload = {
+                materials, receipts, issues, settings, users, rememberedDevices,
+                lastUpdated: Date.now(),
+                updatedBy: currentUser ? currentUser.username : 'unknown'
+            };
+            lastAppliedFromCloud = payload.lastUpdated;
+            return firebaseDb.ref(CLOUD_PATH).set(payload)
+                .then(() => {
+                    lastSyncedAt = new Date();
+                    updateCloudStatus('connected', 'Synced with cloud');
+                    if (!silent) showToast('⬆️ Pushed to cloud', 'success');
+                })
+                .catch(err => {
+                    updateCloudStatus('error', 'Push failed');
+                    if (!silent) showToast('Push failed: ' + err.message, 'error');
+                });
+        }
+
+        function cloudPullAll() {
+            if (!isAdmin) { showToast('⛔ Only admins can pull from cloud', 'error'); return; }
+            if (!firebaseDb) { showToast('Firebase not initialized', 'error'); return; }
+            updateCloudStatus('syncing', 'Downloading…');
+            firebaseDb.ref(CLOUD_PATH).once('value')
+                .then(snap => {
+                    const data = snap.val();
+                    if (!data) { showToast('No cloud data found — push first', 'info'); updateCloudStatus('connected', 'Connected (no data)'); return; }
+                    if (!confirm(`Pull cloud data?\n\nMaterials: ${(data.materials || []).length}\nReceipts: ${(data.receipts || []).length}\nIssues: ${(data.issues || []).length}\n\nThis will OVERWRITE your local data.`)) return;
+
+                    suppressPush = true;
+                    if (Array.isArray(data.materials)) materials = data.materials;
+                    if (Array.isArray(data.receipts)) receipts = data.receipts;
+                    if (Array.isArray(data.issues)) issues = data.issues;
+                    if (Array.isArray(data.users)) users = data.users;
+                    if (Array.isArray(data.rememberedDevices)) rememberedDevices = data.rememberedDevices;
+                    if (data.settings) settings = { ...settings, ...data.settings };
+                    if (!settings.settingsPassword) settings.settingsPassword = 'admin123';
+                    if (!settings.reversalPassword) settings.reversalPassword = 'admin123';
+                    if (!settings.deletePassword) settings.deletePassword = 'admin123';
+                    if (!settings.storeKey) settings.storeKey = 'STORE2024';
+
+                    lastAppliedFromCloud = data.lastUpdated || Date.now();
+                    saveToLocalStorage(); loadAllData();
+                    if (isAdmin) renderRememberedDevices();
+                    lastSyncedAt = new Date();
+                    updateCloudStatus('connected', 'Synced with cloud');
+                    showToast('⬇️ Pulled from cloud', 'success');
+                    setTimeout(() => { suppressPush = false; }, 500);
+                })
+                .catch(err => { updateCloudStatus('error', 'Pull failed'); showToast('Pull failed: ' + err.message, 'error'); });
+        }
+
+        function toggleAutoSync() {
+            if (!isAdmin) { document.getElementById('autoSyncToggle').checked = false; showToast('⛔ Only admins can enable live sync', 'error'); return; }
+            const on = document.getElementById('autoSyncToggle').checked;
+            if (on) enableAutoSync(); else disableAutoSync();
+        }
+
+        function enableAutoSync() {
+            if (!firebaseDb) { showToast('Firebase not initialized', 'error'); document.getElementById('autoSyncToggle').checked = false; return; }
+            autoSyncEnabled = true;
+            document.getElementById('autoSyncToggle').checked = true;
+
+            if (cloudListenerRef) cloudListenerRef.off();
+            cloudListenerRef = firebaseDb.ref(CLOUD_PATH);
+            cloudListenerRef.on('value', snapshot => {
+                const data = snapshot.val();
+                if (!data || !data.lastUpdated) return;
+                if (data.lastUpdated <= lastAppliedFromCloud) return;
+                if (data.lastUpdated <= lastLocalChange) return;
+
+                suppressPush = true;
+                if (Array.isArray(data.materials)) materials = data.materials;
+                if (Array.isArray(data.receipts)) receipts = data.receipts;
+                if (Array.isArray(data.issues)) issues = data.issues;
+                if (Array.isArray(data.users)) users = data.users;
+                if (Array.isArray(data.rememberedDevices)) rememberedDevices = data.rememberedDevices;
+                if (data.settings) settings = { ...settings, ...data.settings };
+                if (!settings.settingsPassword) settings.settingsPassword = 'admin123';
+                if (!settings.reversalPassword) settings.reversalPassword = 'admin123';
+                if (!settings.deletePassword) settings.deletePassword = 'admin123';
+                if (!settings.storeKey) settings.storeKey = 'STORE2024';
+
+                lastAppliedFromCloud = data.lastUpdated;
+                saveToLocalStorage(); loadAllData();
+                if (isAdmin) renderRememberedDevices();
+                lastSyncedAt = new Date();
+                updateCloudStatus('connected', 'Live — synced from cloud');
+                showToast('🔄 Live update received', 'info');
+                setTimeout(() => { suppressPush = false; }, 300);
+            }, err => { updateCloudStatus('error', 'Listener error'); console.error('Listener error:', err); });
+
+            cloudPushAll(true);
+            updateCloudStatus('connected', 'Live sync enabled');
+            showToast('🔄 Live auto-sync enabled', 'success');
+        }
+
+        function disableAutoSync() {
+            autoSyncEnabled = false;
+            document.getElementById('autoSyncToggle').checked = false;
+            if (cloudListenerRef) { cloudListenerRef.off(); cloudListenerRef = null; }
+            updateCloudStatus('offline', 'Live sync disabled');
+            showToast('Live auto-sync disabled', 'info');
+        }
+
+        function scheduleCloudPush() {
+            if (!autoSyncEnabled || suppressPush || !firebaseDb || !isAdmin) return;
+            lastLocalChange = Date.now();
+            clearTimeout(pushDebounceTimer);
+            pushDebounceTimer = setTimeout(() => {
+                cloudPushAll(true).then(() => { updateCloudStatus('connected', 'Live — just pushed'); });
+            }, 900);
+        }
+
+        // ===================== UTIL =====================
+        function closeModal() { document.getElementById('modal').classList.remove('active'); }
+        document.getElementById('modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+
+        function saveToLocalStorage() {
+            localStorage.setItem('materials', JSON.stringify(materials));
+            localStorage.setItem('receipts', JSON.stringify(receipts));
+            localStorage.setItem('issues', JSON.stringify(issues));
+            localStorage.setItem('settings', JSON.stringify(settings));
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('rememberedDevices', JSON.stringify(rememberedDevices));
+            scheduleCloudPush();
+        }
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast ' + type;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+            if (e.ctrlKey && e.key === 's') { e.preventDefault(); if (isAdmin) saveData(); }
+        });
+
+        // ===================== SESSION RESTORE =====================
+        (function tryRestoreSession() {
+            const stored = sessionStorage.getItem('loggedInUser');
+            if (!stored) return;
+            try {
+                const u = JSON.parse(stored);
+                const fresh = users.find(x => x.username === u.username && x.password === u.password);
+                if (!fresh) return;
+                currentUser = fresh;
+                isAdmin = fresh.role === 'admin';
+                isViewer = fresh.role === 'viewer';
+                pendingStoreKeyUser = fresh;
+
+                // Check remembered device
+                const deviceId = getDeviceId();
+                const remembered = rememberedDevices.find(d => d.username === fresh.username && d.deviceId === deviceId);
+
+                document.getElementById('loginOverlay').classList.add('hidden');
+                if (remembered) {
+                    storeKeyActivated = true;
+                    document.getElementById('storeKeyOverlay').classList.remove('active');
+                    document.getElementById('app').style.display = 'block';
+                    initializeApp();
+                } else {
+                    document.getElementById('storeKeyOverlay').classList.add('active');
+                    document.getElementById('storeKeyUserLine').textContent = `Signing in as: ${fresh.username} (${fresh.role})`;
+                    document.getElementById('rememberDeviceCheck').checked = fresh.role === 'viewer';
+                    document.getElementById('storeKeyInput').focus();
+                }
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
+</body>
+</html>
